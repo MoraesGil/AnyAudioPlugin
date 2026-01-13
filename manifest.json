@@ -1,0 +1,59 @@
+{
+  "Version": "1.0.0",
+  "Author": "moraesdev",
+  "Name": "AnySound",
+  "Description": "Professional audio device switcher via Hammerspoon API",
+  "Icon": "assets/icons/icon_plugin.svg",
+  "UUID": "com.moraes.anysound",
+  "Category": "Audio",
+  "CategoryIcon": "assets/icons/icon_category.svg",
+  "CodePath": "dist/app.js",
+  "Type": "JavaScript",
+  "PrivateAPI": false,
+  "SupportedInMultiActions": false,
+  "Actions": [
+    {
+      "Name": "Set Input Device",
+      "Tooltip": "Switch to a specific input device (microphone)",
+      "Icon": "assets/actions/input/icon_input.svg",
+      "UUID": "com.moraes.anysound.input",
+      "PropertyInspectorPath": "property-inspector/input/inspector.html",
+      "state": 0,
+      "States": [
+        {
+          "Image": "assets/actions/input/input_inactive.svg"
+        },
+        {
+          "Image": "assets/actions/input/input_active.svg"
+        }
+      ],
+      "SupportedInMultiActions": false
+    },
+    {
+      "Name": "Set Output Device",
+      "Tooltip": "Switch to a specific output device (speaker/headphones)",
+      "Icon": "assets/actions/output/icon_output.svg",
+      "UUID": "com.moraes.anysound.output",
+      "PropertyInspectorPath": "property-inspector/output/inspector.html",
+      "state": 0,
+      "States": [
+        {
+          "Image": "assets/actions/output/output_inactive.svg"
+        },
+        {
+          "Image": "assets/actions/output/output_active.svg"
+        }
+      ],
+      "SupportedInMultiActions": false
+    }
+  ],
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.15"
+    }
+  ],
+  "Software": {
+    "MinimumVersion": "1.0.0"
+  }
+}

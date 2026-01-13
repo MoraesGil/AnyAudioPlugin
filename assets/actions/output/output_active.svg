@@ -1,0 +1,11 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Alto-falante verde (ativo) - versão menor e centralizada -->
+  <rect width="256" height="256" fill="none"/>
+
+  <!-- Cone do speaker -->
+  <path d="M 95 105 L 120 105 L 155 85 L 155 171 L 120 151 L 95 151 L 95 105 Z" fill="#34C759" stroke="#34C759" stroke-width="3"/>
+
+  <!-- Ondas de som -->
+  <path d="M 168 110 Q 183 128 168 146" fill="none" stroke="#34C759" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 183 95 Q 205 128 183 161" fill="none" stroke="#34C759" stroke-width="5" stroke-linecap="round"/>
+</svg>

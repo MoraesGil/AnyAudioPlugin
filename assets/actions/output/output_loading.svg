@@ -1,0 +1,16 @@
+<svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+  <rect width="144" height="144" fill="#1a1a1a" rx="20"/>
+  
+  <!-- Loading circle (animated visually through color) -->
+  <circle cx="72" cy="72" r="50" fill="none" stroke="#FFA500" stroke-width="3" opacity="0.3"/>
+  
+  <!-- Speaker icon in orange -->
+  <g transform="translate(72, 72)">
+    <!-- Speaker base -->
+    <path d="M -15 -20 L -15 20 L 0 15 L 0 -15 Z" fill="#FFA500"/>
+    
+    <!-- Sound waves -->
+    <path d="M 8 -15 Q 15 -10, 15 0 Q 15 10, 8 15" fill="none" stroke="#FFA500" stroke-width="3"/>
+    <path d="M 15 -20 Q 25 -12, 25 0 Q 25 12, 15 20" fill="none" stroke="#FFA500" stroke-width="3"/>
+  </g>
+</svg>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover"
+  />
+  <title>Set Output Device</title>
+  <link rel="stylesheet" href="../../libs/css/udpi.css">
+  <style>
+    .udpi-item-label{
+      width: 158px;
+    }
+  </style>
+</head>
+<body>
+  <div class="udpi-wrapper hidden">
+    <form id="property-inspector" class="connnect-state connnect-state-ready">
+      <div type="select" class="udpi-item">
+        <div class="udpi-item-label" data-localize>Output Device</div>
+        <select class="udpi-item-value select" id="oList" name="currentIndex">
+        </select>
+      </div>
+    </form>
+  </div>
+
+  <script src="../../libs/js/constants.js"></script>
+  <script src="../../libs/js/eventEmitter.js"></script>
+  <script src="../../libs/js/timers.js"></script>
+  <script src="../../libs/js/utils.js"></script>
+  <script src="../../libs/js/ulanzideckApi.js"></script>
+  <script src="./inspector.js"></script>
+</body>
+</html>
