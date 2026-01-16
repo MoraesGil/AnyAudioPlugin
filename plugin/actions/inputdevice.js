@@ -12,10 +12,16 @@ export default class InputDevice {
       deviceIndex: null,
       deviceList: []
     }
+    this.isSwitching = false // Flag para evitar múltiplas chamadas simultâneas
 
     // Aguarda AudioAPI carregar devices
     this.$AudioAPI.on('devicesLoaded', () => {
       this.sendDeviceList()
+    })
+
+    // Aguarda status inicial ser carregado para atualizar ícone corretamente
+    this.$AudioAPI.on('statusLoaded', () => {
+      this.updateIcon()
     })
 
     // Monitora mudanças de device ativo
@@ -24,7 +30,11 @@ export default class InputDevice {
     })
 
     this.sendDeviceList()
-    this.updateIcon()
+
+    // Só atualiza ícone se status já foi carregado, senão aguarda evento statusLoaded
+    if (this.$AudioAPI.isStatusLoaded) {
+      this.updateIcon()
+    }
   }
 
   // Envia lista de devices para PropertyInspector
@@ -32,19 +42,10 @@ export default class InputDevice {
     const devices = this.$AudioAPI.getDevices('input')
     this.config.deviceList = devices
 
-    console.log('[INPUT] sendDeviceList - devices:', devices ? devices.length : 0)
-
-    if (!devices || devices.length === 0) {
-      console.warn('[INPUT] No devices to send!')
-      return
-    }
-
     this.$UD.sendParamFromPlugin({
       list: devices,
       currentIndex: this.config.deviceIndex
     }, this.context)
-
-    console.log('[INPUT] Sent list with', devices.length, 'devices')
   }
 
   // Botão adicionado ao deck
@@ -55,6 +56,13 @@ export default class InputDevice {
 
   // Botão clicado - troca device
   async run() {
+    // Proteção contra fast switching
+    if (this.isSwitching) {
+      console.warn('[INPUT] Switch already in progress, ignoring...')
+      this.$UD.toast('⏳ Aguarde...')
+      return
+    }
+
     const index = this.config.deviceIndex
 
     if (index === null || index === undefined) {
@@ -70,16 +78,34 @@ export default class InputDevice {
       return
     }
 
+    // Verifica se o device já está ativo (evita chamada desnecessária à API)
+    const currentIndex = this.$AudioAPI.getCurrentDeviceIndex('input')
+    if (Number(currentIndex) === Number(index)) {
+      console.log('[INPUT] Device already active, skipping API call')
+      this.$UD.toast(`✓ ${device.name}`)
+      return
+    }
+
     console.log('[INPUT] Switching to device at index:', index, '(', device.name, ')')
 
-    // Usa endpoint index (resolve problema de nomes duplicados)
-    const success = await this.$AudioAPI.setDeviceByIndex('input', index)
+    // Marca como switching
+    this.isSwitching = true
 
-    if (success) {
-      this.$UD.toast(`🎤 ${device.name}`)
-      this.updateIcon()
-    } else {
-      this.$UD.toast('❌ Failed to switch device')
+    try {
+      // Usa endpoint index (resolve problema de nomes duplicados)
+      const success = await this.$AudioAPI.setDeviceByIndex('input', index)
+
+      if (success) {
+        this.$UD.toast(`🎤 ${device.name}`)
+        this.updateIcon()
+      } else {
+        this.$UD.toast('❌ Failed to switch device')
+      }
+    } finally {
+      // Sempre libera o lock após 500ms
+      setTimeout(() => {
+        this.isSwitching = false
+      }, 500)
     }
   }
 
@@ -93,7 +119,8 @@ export default class InputDevice {
   // Settings atualizados do PropertyInspector
   setParams(params) {
     if (params.currentIndex !== undefined) {
-      this.config.deviceIndex = params.currentIndex
+      // Garante que deviceIndex seja sempre número
+      this.config.deviceIndex = Number(params.currentIndex)
       this.updateIcon()
     }
   }
@@ -115,8 +142,10 @@ export default class InputDevice {
       return
     }
 
-    const currentDevice = this.$AudioAPI.getCurrentDevice('input')
-    const isActive = currentDevice === device.name
+    // IMPORTANTE: Compara por ÍNDICE, não por nome (resolve ARZOPAs duplicados)
+    // Converte ambos para Number para evitar problema de string vs number (0 !== "0")
+    const currentIndex = this.$AudioAPI.getCurrentDeviceIndex('input')
+    const isActive = Number(currentIndex) === Number(index)
 
     this.$UD.setStateIcon(this.context, isActive ? 1 : 0) // 1=Verde, 0=Vermelho
   }

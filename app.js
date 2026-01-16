@@ -1,1 +1,161 @@
-(()=>{"use strict";var e={n:t=>{var i=t&&t.__esModule?()=>t.default:()=>t;return e.d(i,{a:i}),i},d:(t,i)=>{for(var o in i)e.o(i,o)&&!e.o(t,o)&&Object.defineProperty(t,o,{enumerable:!0,get:i[o]})},o:(e,t)=>Object.prototype.hasOwnProperty.call(e,t)};const t=new class{getFormValue(e){"string"==typeof e&&(e=document.querySelector(e));const t=e?.elements;t||console.error("Could not find form!");const i=new FormData(e);let o={};return i.forEach((e,t)=>{Reflect.has(o,t)?(Array.isArray(o[t])||(o[t]=[o[t]]),o[t].push(e)):o[t]=e}),o}setFormValue(e,t){if(!e)return;"string"==typeof t&&(t=document.querySelector(t));const i=t?.elements;i||console.error("Could not find form!"),Array.from(i).filter(e=>e?.name).forEach(t=>{const{name:i,type:o}=t,n=i in e?e[i]:null;null!==n&&("checkbox"===o||"radio"===o?(n===t.value||Array.isArray(n)&&n.includes(t.value))&&(t.checked=!0):t.value=n??"")})}debounce(e,t=150){let i=null;return(...o)=>{clearTimeout(i),i=setTimeout(()=>{e.apply(null,o)},t)}}parseJson(e){if("object"==typeof e)return e;try{const t=JSON.parse(e);if(t&&"object"==typeof t)return t}catch(e){}return!1}joinTimestamp(){return{_t:(new Date).getTime()}}adaptLanguage(e){let t=e;return 0==e.indexOf("zh")?t="zh_CN":0==e.indexOf("en")?t="en":-1!==t.indexOf("-")&&(t=t.split("-")[0]),t}getPluginPath(){const e=process.argv[1];let t="/";e.indexOf("\\")>-1&&(t="\\");const i=e.split(t),o=i.findIndex(e=>e.endsWith("ulanziPlugin"));return`${i.slice(0,o+1).join("/")}`}log(...e){console.log(`[${(new Date).toLocaleString("zh-CN",{hour12:!1})}]`,...e)}warn(...e){console.warn(`[${(new Date).toLocaleString("zh-CN",{hour12:!1})}]`,...e)}error(...e){console.error(`[${(new Date).toLocaleString("zh-CN",{hour12:!1})}]`,...e)}};require("crypto"),require("fs");const i=require("ws"),o=require("events");var n=e.n(o);const s=Object.freeze({CONNECTED:"connected",CLOSE:"close",ERROR:"error",ADD:"add",RUN:"run",PARAMFROMAPP:"paramfromapp",PARAMFROMPLUGIN:"paramfromplugin",SETACTIVE:"setactive",CLEAR:"clear",TOAST:"toast",STATE:"state",OPENURL:"openurl",OPENVIEW:"openview",SELECTDIALOG:"selectdialog"}),c={DEFAULT:"closed *****"};class r extends(n()){constructor(){super(),this.API_BASE="http://127.0.0.1:8765",this.POLL_INTERVAL=3e4,this.devices={input:[],output:[]},this.currentDevices={input:null,output:null},this.isConnected=!1,this.init()}async init(){if(!(await this.callAPI("/health")).success)return console.error("❌ Hammerspoon API not running!"),void this.emit("disconnected");console.log("✅ Hammerspoon API OK"),this.isConnected=!0,this.emit("connected"),await this.loadDevices(),this.startPolling()}async callAPI(e,t={}){const i=t.timeout||5e3,o=t.retries||0;for(let t=0;t<=o;t++)try{const t=new AbortController,o=setTimeout(()=>t.abort(),i),n=await fetch(`${this.API_BASE}${e}`,{signal:t.signal});if(clearTimeout(o),!n.ok)throw new Error(`HTTP ${n.status}: ${n.statusText}`);return{success:!0,data:await n.json()}}catch(i){const n=t===o;if("AbortError"===i.name){if(console.error(`API Timeout [${e}] (attempt ${t+1}/${o+1})`),n)return{success:!1,error:"Request timeout - API não respondeu"}}else if(console.error(`API Error [${e}] (attempt ${t+1}/${o+1}):`,i.message),n)return{success:!1,error:i.message};n||await new Promise(e=>setTimeout(e,500*Math.pow(2,t)))}return{success:!1,error:"Max retries reached"}}async loadDevices(){console.log("[AudioAPI] Loading devices...");const e=await this.callAPI("/audio/devices/list");e.success&&e.data.devices?(this.devices.input=e.data.devices.input,this.devices.output=e.data.devices.output,console.log("✅ Devices loaded - Input:",this.devices.input.length,"Output:",this.devices.output.length),console.log("[AudioAPI] Output devices:",{input:this.devices.input.length,output:this.devices.output.length}),this.emit("devicesLoaded")):console.error("❌ Failed to load devices")}async getStatus(){const e=await this.callAPI("/audio/status");if(e.success){const t=this.currentDevices.input,i=this.currentDevices.output;this.currentDevices.input=e.data.input.name,this.currentDevices.output=e.data.output.name,t!==this.currentDevices.input&&this.emit("inputChanged",this.currentDevices.input),i!==this.currentDevices.output&&this.emit("outputChanged",this.currentDevices.output)}return e}async setDevice(e,t){const i=encodeURIComponent(t),o=await this.callAPI(`/audio/${e}/${i}/set`);return o.success&&o.data.success?(console.log(`✅ ${e} changed to: ${t}`),this.currentDevices[e]=t,this.emit(`${e}Changed`,t),!0):(console.error(`❌ Failed to change ${e}`),!1)}async setDeviceByIndex(e,t){const i=Number(t)+1,o=await this.callAPI(`/audio/${e}/index/${i}/set`,{timeout:3e3,retries:1});return o.success?o.data.success?(console.log(`✅ ${e} changed to: ${o.data.device} (Index: ${t})`),this.currentDevices[e]=o.data.device,this.emit(`${e}Changed`,o.data.device),!0):(console.error(`❌ Failed to change ${e} by index:`,o.data.error||"Unknown error"),!1):(console.error("❌ API call failed:",o.error),!1)}startPolling(){setInterval(()=>{this.getStatus()},this.POLL_INTERVAL),this.getStatus()}getDevices(e){return this.devices[e]||[]}getCurrentDevice(e){return this.currentDevices[e]}}class a{constructor(e,t,i){this.$UD=t,this.$AudioAPI=i,this.context=e,this.config={deviceIndex:null,deviceList:[]},this.isSwitching=!1,this.$AudioAPI.on("devicesLoaded",()=>{this.sendDeviceList()}),this.$AudioAPI.on("inputChanged",()=>{this.updateIcon()}),this.sendDeviceList(),this.updateIcon()}sendDeviceList(){const e=this.$AudioAPI.getDevices("input");this.config.deviceList=e,console.log("[INPUT] sendDeviceList - devices:",e?e.length:0),e&&0!==e.length?(this.$UD.sendParamFromPlugin({list:e,currentIndex:this.config.deviceIndex},this.context),console.log("[INPUT] Sent list with",e.length,"devices")):console.warn("[INPUT] No devices to send!")}add(){this.sendDeviceList(),this.updateIcon()}async run(){if(this.isSwitching)return console.warn("[INPUT] Switch already in progress, ignoring..."),void this.$UD.toast("⏳ Aguarde...");const e=this.config.deviceIndex;if(console.log("[INPUT] run() - deviceIndex:",e,"type:",typeof e),null==e)return console.error("[INPUT] Device not configured!"),void this.$UD.toast("⚠️ Device not configured");const t=this.$AudioAPI.getDevices("input");console.log("[INPUT] Available devices:",t.length,"devices:",t.map(e=>e.name));const i=t[e];if(!i)return console.error("[INPUT] Device not found at index:",e,"- Available:",t.length),void this.$UD.toast("❌ Device not found");console.log("[INPUT] Switching to device at index:",e,"(",i.name,")","UID:",i.uid),this.isSwitching=!0;try{await this.$AudioAPI.setDeviceByIndex("input",e)?(this.$UD.toast(`🎤 ${i.name}`),this.updateIcon()):this.$UD.toast("❌ Failed to switch device")}finally{setTimeout(()=>{this.isSwitching=!1},500)}}setActive(e){e&&this.updateIcon()}setParams(e){void 0!==e.currentIndex&&(this.config.deviceIndex=e.currentIndex,this.updateIcon())}updateIcon(){const e=this.config.deviceIndex;if(null==e)return void this.$UD.setStateIcon(this.context,0);const t=this.$AudioAPI.getDevices("input")[e];if(!t)return void this.$UD.setStateIcon(this.context,0);const i=this.$AudioAPI.getCurrentDevice("input")===t.name;this.$UD.setStateIcon(this.context,i?1:0)}clear(){}}class d{constructor(e,t,i){this.$UD=t,this.$AudioAPI=i,this.context=e,this.config={deviceIndex:null,deviceList:[]},this.isSwitching=!1,this.$AudioAPI.on("devicesLoaded",()=>{this.sendDeviceList()}),this.$AudioAPI.on("outputChanged",()=>{this.updateIcon()}),this.sendDeviceList(),this.updateIcon()}sendDeviceList(){const e=this.$AudioAPI.getDevices("output");this.config.deviceList=e,console.log("[OUTPUT] sendDeviceList - devices:",e?e.length:0),e&&0!==e.length?(this.$UD.sendParamFromPlugin({list:e,currentIndex:this.config.deviceIndex},this.context),console.log("[OUTPUT] Sent list with",e.length,"devices")):console.warn("[OUTPUT] No devices to send!")}add(){this.sendDeviceList(),this.updateIcon()}async run(){if(this.isSwitching)return console.warn("[OUTPUT] Switch already in progress, ignoring..."),void this.$UD.toast("⏳ Aguarde...");const e=this.config.deviceIndex;if(null==e)return void this.$UD.toast("⚠️ Device not configured");const t=this.$AudioAPI.getDevices("output")[e];if(t){console.log("[OUTPUT] Switching to device at index:",e,"(",t.name,")"),this.isSwitching=!0;try{await this.$AudioAPI.setDeviceByIndex("output",e)?(this.$UD.toast(`🔊 ${t.name}`),this.updateIcon()):this.$UD.toast("❌ Failed to switch device")}finally{setTimeout(()=>{this.isSwitching=!1},500)}}else this.$UD.toast("❌ Device not found")}setActive(e){e&&this.updateIcon()}setParams(e){void 0!==e.currentIndex&&(this.config.deviceIndex=e.currentIndex,this.updateIcon())}updateIcon(){const e=this.config.deviceIndex;if(null==e)return void this.$UD.setStateIcon(this.context,0);const t=this.$AudioAPI.getDevices("output")[e];if(!t)return void this.$UD.setStateIcon(this.context,0);const i=this.$AudioAPI.getCurrentDevice("output")===t.name;this.$UD.setStateIcon(this.context,i?1:0)}clear(){}}const u={},l=new class extends o{constructor(){super(),this.key="",this.uuid="",this.actionid="",this.websocket=null}connect(e,o=3906,n="127.0.0.1"){const[r,a,d]=process.argv.splice(2);this.address=r||n,this.port=a||o,this.language=t.adaptLanguage(d||"en"),this.uuid=e,this.websocket&&(this.websocket.close(),this.websocket=null);const u=4==this.uuid.split(".").length;this.websocket=new i(`ws://${this.address}:${this.port}`),this.websocket.onopen=()=>{t.log("[ULANZIDECK] MAIN WEBSOCKET OPEN:",e);const i={code:0,cmd:s.CONNECTED,uuid:e};this.websocket.send(JSON.stringify(i)),this.emit(s.CONNECTED,{})},this.websocket.onerror=e=>{const i=`[ULANZIDECK] MAIN WEBSOCKET ERROR: ${JSON.stringify(e)}, ${JSON.stringify(e.data)}, ${c[e?.code||"DEFAULT"]}`;t.warn(i),this.emit(s.ERROR,i)},this.websocket.onclose=e=>{t.warn("[ULANZIDECK] MAIN WEBSOCKET CLOSED:",c[e?.code||"DEFAULT"]),this.emit(s.CLOSE)},this.websocket.onmessage=e=>{t.log("[ULANZIDECK] MAIN WEBSOCKET MESSGE ");const i=e?.data?JSON.parse(e.data):null;if(t.log("[ULANZIDECK] MAIN WEBSOCKET MESSGE DATA:",JSON.stringify(i)),i&&(void 0===i.code||"REQUEST"===i.cmdType)){if(t.log("[ULANZIDECK] MAIN WEBSOCKET MESSGE IN"),!this.key&&i.uuid==this.uuid&&i.key&&(this.key=i.key),!this.actionid&&i.uuid==this.uuid&&i.actionid&&(this.actionid=i.actionid),u&&this.send(i.cmd,{code:0,...i}),"clear"==i.cmd){if(i.param)for(let e=0;e<i.param.length;e++){const t=this.encodeContext(i.param[e]);i.param[e].context=t}}else{const e=this.encodeContext(i);i.context=e}this.emit(i.cmd,i)}}}async localizeUI(){const e=document.querySelector(".udpi-wrapper");if(!e)return t.warn("No element found to localize");if(this.language=t.getLanguage()||"en",!this.localization)try{const e=await t.readJson(`${this.localPathPrefix}${this.language}.json`);this.localization=e.Localization??null}catch(e){t.log(`${this.localPathPrefix}${this.language}.json`),t.warn("No FILE found to localize "+this.language)}this.localization&&e.querySelectorAll("[data-localize]").forEach(e=>{const t=e.innerText.trim();e.innerHTML=e.innerHTML.replace(t,this.localization[t]||t),e.placeholder&&e.placeholder.length&&(e.placeholder=this.localization[e.placeholder]||e.placeholder),e.title&&e.title.length&&(e.title=this.localization[e.title]||e.title),e.label&&(e.label=this.localization[e.label]||e.label)})}encodeContext(e){return e.uuid+"___"+e.key+"___"+e.actionid}decodeContext(e){const t=e.split("___");return{uuid:t[0],key:t[1],actionid:t[2]}}send(e,t){this.websocket&&this.websocket.send(JSON.stringify({cmd:e,uuid:this.uuid,key:this.key,actionid:this.actionid,...t}))}sendParamFromPlugin(e,t){const{uuid:i,key:o,actionid:n}=t?this.decodeContext(t):{};this.send(s.PARAMFROMPLUGIN,{uuid:i||this.uuid,key:o||this.key,actionid:n||this.actionid,param:e})}openUrl(e,t,i){this.send(s.OPENURL,{url:e,local:!!t,param:i||null})}openView(e,t=200,i=200,o,n,c){const r={url:e,width:t,height:i};o&&(r.x=o),n&&(r.y=n),c&&(r.param=c),this.send(s.OPENVIEW,r)}toast(e){this.send(s.TOAST,{msg:e})}selectFileDialog(e){this.send(s.SELECTDIALOG,{type:"file",filter:e})}selectFolderDialog(){this.send(s.SELECTDIALOG,{type:"folder"})}setStateIcon(e,t,i){const{uuid:o,key:n,actionid:c}=this.decodeContext(e);this.send(s.STATE,{param:{statelist:[{uuid:o,key:n,actionid:c,type:0,state:t,textData:i||"",showtext:!!i}]}})}setBaseDataIcon(e,t,i){const{uuid:o,key:n,actionid:c}=this.decodeContext(e);this.send(s.STATE,{param:{statelist:[{uuid:o,key:n,actionid:c,type:1,data:t,textData:i||"",showtext:!!i}]}})}setPathIcon(e,t,i){const{uuid:o,key:n,actionid:c}=this.decodeContext(e);this.send(s.STATE,{param:{statelist:[{uuid:o,key:n,actionid:c,type:2,path:t,textData:i||"",showtext:!!i}]}})}setGifDataIcon(e,t,i){const{uuid:o,key:n,actionid:c}=this.decodeContext(e);this.send(s.STATE,{param:{statelist:[{uuid:o,key:n,actionid:c,type:3,gifdata:t,textData:i||"",showtext:!!i}]}})}setGifPathIcon(e,t,i){const{uuid:o,key:n,actionid:c}=this.decodeContext(e);this.send(s.STATE,{param:{statelist:[{uuid:o,key:n,actionid:c,type:4,gifpath:t,textData:i||"",showtext:!!i}]}})}onConnected(e){return e||t.error("A callback function for the connected event is required for onConnected."),this.on(s.CONNECTED,t=>e(t)),this}onClose(e){return e||t.error("A callback function for the close event is required for onClose."),this.on(s.CLOSE,t=>e(t)),this}onError(e){return e||t.error("A callback function for the error event is required for onError."),this.on(s.ERROR,t=>e(t)),this}onAdd(e){return e||t.error("A callback function for the add event is required for onAdd."),this.on(s.ADD,t=>e(t)),this}onParamFromApp(e){return e||t.error("A callback function for the paramfromapp event is required for onParamFromApp."),this.on(s.PARAMFROMAPP,t=>e(t)),this}onParamFromPlugin(e){return e||t.error("A callback function for the paramfromplugin event is required for onParamFromPlugin."),this.on(s.PARAMFROMPLUGIN,t=>e(t)),this}onRun(e){return e||t.error("A callback function for the run event is required for onRun."),this.on(s.RUN,t=>e(t)),this}onSetActive(e){return e||t.error("A callback function for the setactive event is required for onSetActive."),this.on(s.SETACTIVE,t=>e(t)),this}onClear(e){return e||t.error("A callback function for the clear event is required for onClear."),this.on(s.CLEAR,t=>e(t)),this}onSelectdialog(e){return e||t.error("A callback function for the selectdialog event is required for onSelectdialog."),this.on(s.SELECTDIALOG,t=>e(t)),this}},h=new r;function g(e){const t=e.param||{},i=e.context,o=u[i];t&&o&&"{}"!==JSON.stringify(t)&&(console.log("⚙️  onSetParams:",{context:i,settings:t}),"function"==typeof o.setParams&&o.setParams(t))}l.connect("com.moraes.anysound"),l.onConnected(e=>{console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"),console.log("🎵 AnySound v1.0 - Professional Audio Switcher"),console.log("✅ Connected to UlanziDeck"),console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")}),l.onAdd(e=>{const{context:t,uuid:i,param:o}=e,n=u[t];if(console.log("➕ onAdd:",{context:t,uuid:i}),n)"function"==typeof n.add&&n.add();else if("com.moraes.anysound.input"===i?u[t]=new a(t,l,h):"com.moraes.anysound.output"===i&&(u[t]=new d(t,l,h)),o&&Object.keys(o).length>0){const e=u[t];e&&"function"==typeof e.setParams&&e.setParams(o)}}),l.onSetActive(e=>{const{context:t,active:i}=e,o=u[t];o&&"function"==typeof o.setActive&&o.setActive(i)}),l.onRun(e=>{const{context:t}=e,i=u[t];i?(console.log("🔘 onRun:",t),"function"==typeof i.run&&i.run(e)):l.emit("add",e)}),l.onClear(e=>{if(e.param&&Array.isArray(e.param))for(let t=0;t<e.param.length;t++){const i=e.param[t].context,o=u[i];console.log("🗑️  onClear:",i),o&&"function"==typeof o.clear&&o.clear(i),delete u[i]}}),l.onParamFromApp(e=>{g(e)}),l.onParamFromPlugin(e=>{g(e)}),l.onClose(()=>{console.log("🔌 Disconnected"),process.exit(0)}),l.onError(e=>{console.error("❌ Error:",e)}),process.on("uncaughtException",e=>{console.error("💥 Exception:",e)}),process.on("unhandledRejection",e=>{console.error("💥 Rejection:",e)}),console.log("🚀 AnySound Plugin starting..."),module.exports={}})();
+#!/usr/bin/env node
+/**
+ * AnySound Plugin v1.0
+ * Professional Audio Device Switcher
+ * Segue padrão oficial do SDK Ulanzi
+ */
+
+import { UlanzideckApi } from './actions/plugin-common-node/index.js'
+import AudioAPI from './actions/audioapi.js'
+import InputDevice from './actions/inputdevice.js'
+import OutputDevice from './actions/outputdevice.js'
+import MicMute from './actions/micmute.js'
+import OutputMute from './actions/outputmute.js'
+
+// Cache de instâncias de botões
+const ACTION_CACHES = {}
+
+// SDK Ulanzi
+const $UD = new UlanzideckApi()
+
+// API de Áudio
+const $AudioAPI = new AudioAPI()
+
+// Conecta ao Ulanzi Studio
+$UD.connect('com.moraes.anysound')
+
+$UD.onConnected(conn => {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+  console.log('🎵 AnySound v1.0 - Professional Audio Switcher')
+  console.log('✅ Connected to UlanziDeck')
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+})
+
+// Botão adicionado ao deck
+$UD.onAdd(jsn => {
+  const { context, uuid, param } = jsn
+  const instance = ACTION_CACHES[context]
+
+  console.log('➕ onAdd:', { context, uuid })
+
+  if (!instance) {
+    // Cria nova instância baseada no UUID
+    if (uuid === 'com.moraes.anysound.input') {
+      ACTION_CACHES[context] = new InputDevice(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.output') {
+      ACTION_CACHES[context] = new OutputDevice(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.micmute') {
+      ACTION_CACHES[context] = new MicMute(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.outputmute') {
+      ACTION_CACHES[context] = new OutputMute(context, $UD, $AudioAPI)
+    }
+
+    // Aplica settings salvos (se houver)
+    if (param && Object.keys(param).length > 0) {
+      const newInstance = ACTION_CACHES[context]
+      if (newInstance && typeof newInstance.setParams === 'function') {
+        newInstance.setParams(param)
+      }
+    }
+  } else {
+    // Instância já existe, chama add()
+    if (typeof instance.add === 'function') {
+      instance.add()
+    }
+  }
+})
+
+// Botão fica visível/invisível
+$UD.onSetActive(jsn => {
+  const { context, active } = jsn
+  const instance = ACTION_CACHES[context]
+
+  // Quando deck fica visível, atualiza status da API
+  // Resolve: first load + mudanças externas (usuário muda device no macOS)
+  if (active) {
+    $AudioAPI.getStatus()
+  }
+
+  if (instance && typeof instance.setActive === 'function') {
+    instance.setActive(active)
+  }
+})
+
+// Botão clicado
+$UD.onRun(jsn => {
+  const { context } = jsn
+  const instance = ACTION_CACHES[context]
+
+  if (!instance) {
+    // Se não existe, cria
+    $UD.emit('add', jsn)
+  } else {
+    console.log('🔘 onRun:', context)
+    if (typeof instance.run === 'function') {
+      instance.run(jsn)
+    }
+  }
+})
+
+// Botão removido
+$UD.onClear(jsn => {
+  if (jsn.param && Array.isArray(jsn.param)) {
+    for (let i = 0; i < jsn.param.length; i++) {
+      const context = jsn.param[i].context
+      const instance = ACTION_CACHES[context]
+
+      console.log('🗑️  onClear:', context)
+
+      if (instance && typeof instance.clear === 'function') {
+        instance.clear(context)
+      }
+
+      delete ACTION_CACHES[context]
+    }
+  }
+})
+
+// Settings atualizados do App
+$UD.onParamFromApp(jsn => {
+  onSetParams(jsn)
+})
+
+// Settings atualizados do PropertyInspector
+$UD.onParamFromPlugin(jsn => {
+  onSetParams(jsn)
+})
+
+// Atualiza params
+function onSetParams(jsn) {
+  const settings = jsn.param || {}
+  const context = jsn.context
+  const instance = ACTION_CACHES[context]
+
+  if (!settings || !instance || JSON.stringify(settings) === '{}') return
+
+  console.log('⚙️  onSetParams:', { context, settings })
+
+  if (typeof instance.setParams === 'function') {
+    instance.setParams(settings)
+  }
+}
+
+// Error handling
+$UD.onClose(() => {
+  console.log('🔌 Disconnected')
+  process.exit(0)
+})
+
+$UD.onError(error => {
+  console.error('❌ Error:', error)
+})
+
+process.on('uncaughtException', (error) => {
+  console.error('💥 Exception:', error)
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error('💥 Rejection:', reason)
+})
+
+console.log('🚀 AnySound Plugin starting...')

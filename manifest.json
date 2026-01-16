@@ -45,6 +45,38 @@
         }
       ],
       "SupportedInMultiActions": false
+    },
+    {
+      "Name": "Microphone Mute Toggle",
+      "Tooltip": "Toggle microphone mute/unmute (independent of device switching)",
+      "Icon": "assets/actions/micmute/icon_micmute.svg",
+      "UUID": "com.moraes.anysound.micmute",
+      "state": 1,
+      "States": [
+        {
+          "Image": "assets/actions/micmute/micmute_inactive.svg"
+        },
+        {
+          "Image": "assets/actions/micmute/micmute_active.svg"
+        }
+      ],
+      "SupportedInMultiActions": false
+    },
+    {
+      "Name": "Output Mute Toggle",
+      "Tooltip": "Toggle output (speaker/headphones) mute/unmute (independent of device switching)",
+      "Icon": "assets/actions/outputmute/icon_outputmute.svg",
+      "UUID": "com.moraes.anysound.outputmute",
+      "state": 1,
+      "States": [
+        {
+          "Image": "assets/actions/outputmute/outputmute_inactive.svg"
+        },
+        {
+          "Image": "assets/actions/outputmute/outputmute_active.svg"
+        }
+      ],
+      "SupportedInMultiActions": false
     }
   ],
   "OS": [

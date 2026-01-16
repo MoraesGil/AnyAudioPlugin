@@ -1,0 +1,14 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Speaker vermelho com linha diagonal (muted/inactive) -->
+  <rect width="256" height="256" fill="none"/>
+
+  <!-- Corpo do speaker -->
+  <rect x="85" y="100" width="35" height="56" fill="#FF3B30" stroke="#FF3B30" stroke-width="2"/>
+
+  <!-- Cone do speaker -->
+  <path d="M 120 100 L 165 75 L 165 181 L 120 156 Z" fill="#FF3B30" stroke="#FF3B30" stroke-width="2"/>
+
+  <!-- X para indicar muted -->
+  <line x1="175" y1="100" x2="205" y2="156" stroke="#FF3B30" stroke-width="8" stroke-linecap="round"/>
+  <line x1="205" y1="100" x2="175" y2="156" stroke="#FF3B30" stroke-width="8" stroke-linecap="round"/>
+</svg>

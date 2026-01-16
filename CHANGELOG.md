@@ -5,6 +5,36 @@ All notable changes to the AnySound Plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-01-16
+
+### Added
+- **Microphone Mute Toggle action** - Independent mute/unmute control for microphone
+- **Output Mute Toggle action** - Independent mute/unmute control for speakers/headphones
+- Dynamic button labels showing next action ("Mute" or "Unmute")
+- Independent mute state that persists when switching devices
+- External mute change detection capability via Hammerspoon watcher
+- Fast-click protection on mute toggle buttons (300ms debounce)
+- Event-driven architecture for monitoring device changes
+- New API endpoints: `/audio/input/mute/status`, `/audio/input/mute/toggle`, `/audio/output/mute/status`, `/audio/output/mute/toggle`
+- Visual feedback with red (muted) and green (unmuted) icons for mute buttons
+
+### Changed
+- Enhanced `AudioAPI` with generic `callAPI()` method for mute endpoints
+- Updated manifest.json to register 4 actions (was 2)
+- Plugin now supports both device switching and independent mute controls
+
+### Fixed
+- N/A
+
+### Deprecated
+- N/A
+
+### Removed
+- N/A
+
+### Security
+- N/A
+
 ## [1.0.0] - 2026-01-12
 
 ### Added
@@ -39,20 +69,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned Features
 - Volume control slider in Property Inspector
-- Mute/unmute toggle action
-- Audio level meter visualization
+- Audio level meter visualization on buttons
 - Device hotkey support (switch without Ulanzi Deck)
 - Audio routing matrix (input to output mapping)
 - Multi-device profiles (switch multiple devices with one button)
+- Real-time external mute change sync to button UI
 - Windows support via alternative audio API
 
 ---
 
 ## Version History Summary
 
-| Version | Date       | Description                           |
-|---------|------------|---------------------------------------|
-| 1.0.0   | 2026-01-12 | Initial release with basic features   |
+| Version | Date       | Description                                      |
+|---------|------------|--------------------------------------------------|
+| 2.0.0   | 2026-01-16 | Added microphone and output mute toggle actions  |
+| 1.0.0   | 2026-01-12 | Initial release with basic features              |
 
 ---
 

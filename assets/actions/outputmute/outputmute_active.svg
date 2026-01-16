@@ -1,0 +1,14 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Speaker verde (unmuted/active) -->
+  <rect width="256" height="256" fill="none"/>
+
+  <!-- Corpo do speaker -->
+  <rect x="85" y="100" width="35" height="56" fill="#34C759" stroke="#34C759" stroke-width="2"/>
+
+  <!-- Cone do speaker -->
+  <path d="M 120 100 L 165 75 L 165 181 L 120 156 Z" fill="#34C759" stroke="#34C759" stroke-width="2"/>
+
+  <!-- Ondas sonoras -->
+  <path d="M 175 110 Q 190 128 175 146" fill="none" stroke="#34C759" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 185 95 Q 210 128 185 161" fill="none" stroke="#34C759" stroke-width="6" stroke-linecap="round"/>
+</svg>

@@ -1,26 +1,34 @@
 # AnySound Plugin for Ulanzi Deck
 
-**Version:** 1.0.0
+**Version:** 2.0.0
 **Author:** Moraes
-**Last Updated:** January 12, 2026
+**Last Updated:** January 16, 2026
 
 ## Overview
 
-AnySound is a professional audio management plugin for Ulanzi Deck that enables seamless switching between audio input and output devices with a single button press. Perfect for content creators, streamers, and professionals who frequently switch between microphones, headphones, and speakers.
+AnySound is a professional audio management plugin for Ulanzi Deck that provides complete audio control with device switching and independent mute toggles. Perfect for content creators, streamers, and professionals who need quick access to audio controls without leaving their workflow.
 
 ## Features
 
 - **Instant Device Switching**: Change audio devices with a single button press
-- **Two Action Types**:
+- **Four Action Types**:
   - **Set Input Device**: Switch microphone/audio input
   - **Set Output Device**: Switch speakers/headphones/audio output
+  - **Microphone Mute Toggle**: 🎤 Mute/unmute microphone independently
+  - **Output Mute Toggle**: 🔊 Mute/unmute speakers/headphones independently
+- **Independent Mute Controls**:
+  - Toggle buttons with no configuration needed
+  - Mute state persists when switching devices
+  - Dynamic labels show next action ("Mute" or "Unmute")
+  - Detects external mute changes (via keyboard or other apps)
 - **Real-time Device Detection**: Automatically detects all available audio devices
 - **Visual Feedback**:
-  - Green icon when device is active
+  - Green icon when device is active/unmuted
+  - Red icon with slash/X when muted
   - Gray icon when device is inactive
   - Loading state while switching
 - **Persistent Settings**: Remembers your device configurations
-- **macOS Integration**: Uses native `hammerspoon` for reliable device switching
+- **macOS Integration**: Uses native Hammerspoon API for reliable control
 
 ## Installation
 
@@ -53,7 +61,11 @@ brew install --cask hammerspoon
 3. **Verify Installation:**
    - Open Ulanzi Studio
    - Look for "AnySound" category in the action list
-   - You should see two actions: "Set Input Device" and "Set Output Device"
+   - You should see four actions:
+     - Set Input Device
+     - Set Output Device
+     - Microphone Mute Toggle
+     - Output Mute Toggle
 
 ## Usage
 
@@ -71,39 +83,68 @@ brew install --cask hammerspoon
 3. **Select your desired speaker/headphone** from the dropdown
 4. **Click to test** - the button will switch to that output device
 
+### Setting Up Microphone Mute Toggle
+
+1. **Drag "Microphone Mute Toggle" action** to a button on your Ulanzi Deck
+2. **No configuration needed** - it's ready to use!
+3. **Click to toggle** - mutes/unmutes your current microphone
+4. **Label shows next action**:
+   - Shows "Mute" when microphone is active (click to mute)
+   - Shows "Unmute" when microphone is muted (click to unmute)
+
+### Setting Up Output Mute Toggle
+
+1. **Drag "Output Mute Toggle" action** to a button on your Ulanzi Deck
+2. **No configuration needed** - it's ready to use!
+3. **Click to toggle** - mutes/unmutes your current speakers/headphones
+4. **Label shows next action**:
+   - Shows "Mute" when output is active (click to mute)
+   - Shows "Unmute" when output is muted (click to unmute)
+
 ### Button States
 
+**Device Switching Buttons:**
 - **Green Icon**: Device is currently active
 - **Gray Icon**: Device is inactive (different device selected)
 - **Loading (⌛)**: Switching in progress
+
+**Mute Toggle Buttons:**
+- **Green Icon + "Mute" label**: Currently unmuted (click to mute)
+- **Red Icon + "Unmute" label**: Currently muted (click to unmute)
 
 ### Example Setups
 
 **Streaming Setup:**
 - Button 1: "Set Input → Shure SM7B" (main microphone)
 - Button 2: "Set Input → MacBook Microphone" (backup mic)
-- Button 3: "Set Output → Studio Monitors"
-- Button 4: "Set Output → Headphones"
+- Button 3: "Microphone Mute Toggle" (quick mute during stream)
+- Button 4: "Set Output → Studio Monitors"
+- Button 5: "Set Output → Headphones"
+- Button 6: "Output Mute Toggle" (mute speakers quickly)
 
 **Meeting Setup:**
 - Button 1: "Set Input → AirPods Pro"
 - Button 2: "Set Output → AirPods Pro"
-- Button 3: "Set Input → Desk Microphone"
-- Button 4: "Set Output → Speakers"
+- Button 3: "Microphone Mute Toggle" (mute during meetings)
+- Button 4: "Set Input → Desk Microphone"
+- Button 5: "Set Output → Speakers"
+- Button 6: "Output Mute Toggle"
 
 ## Project Structure
 
 ```
 com.moraes.anysound.ulanziPlugin/
 ├── manifest.json              # Plugin metadata and configuration
-├── app.js                     # Main application logic (source)
-├── dist/
-│   └── app.js                # Bundled application (production)
 ├── plugin/
+│   ├── app.js                # Main application logic (source)
 │   └── actions/
 │       ├── audioapi.js       # Core audio device API
 │       ├── inputdevice.js    # Input device action class
-│       └── outputdevice.js   # Output device action class
+│       ├── outputdevice.js   # Output device action class
+│       ├── micmute.js        # Microphone mute toggle action class
+│       └── outputmute.js     # Output mute toggle action class
+├── dist/
+│   └── app.js                # Bundled application (production)
 ├── property-inspector/
 │   └── config/
 │       ├── inputdevice.html  # Input device settings UI
@@ -111,7 +152,9 @@ com.moraes.anysound.ulanziPlugin/
 ├── assets/
 │   └── actions/
 │       ├── input/            # Input device icons
-│       └── output/           # Output device icons
+│       ├── output/           # Output device icons
+│       ├── micmute/          # Microphone mute icons
+│       └── outputmute/       # Output mute icons
 ├── libs/                     # Ulanzi SDK libraries
 ├── package.json              # Node.js dependencies
 └── webpack.config.js         # Build configuration
@@ -159,6 +202,18 @@ device:setDefaultInputDevice()
 -- Set default output device
 device = hs.audiodevice.findOutputByName("Device Name")
 device:setDefaultOutputDevice()
+
+-- Microphone mute control
+device = hs.audiodevice.defaultInputDevice()
+device:inputMuted() -- Get mute status
+device:setInputMuted(true) -- Mute
+device:setInputMuted(false) -- Unmute
+
+-- Output mute control
+device = hs.audiodevice.defaultOutputDevice()
+device:outputMuted() -- Get mute status
+device:setOutputMuted(true) -- Mute
+device:setOutputMuted(false) -- Unmute
 ```
 
 ### Code Architecture
@@ -170,13 +225,21 @@ device:setDefaultOutputDevice()
 - `AudioAPI.getCurrentOutputDevice()` - Get active output
 - `AudioAPI.setInputDevice(name)` - Switch input device
 - `AudioAPI.setOutputDevice(name)` - Switch output device
+- `AudioAPI.callAPI(endpoint)` - Generic HTTP API caller for mute endpoints
 
-**inputdevice.js / outputdevice.js** - Action classes:
+**inputdevice.js / outputdevice.js** - Device switching action classes:
 - Constructor: Initialize with context and settings
 - `run()`: Execute device switch
 - `setActive(active)`: Handle button visibility changes
 - `setParams(params)`: Update settings from Property Inspector
 - `updateIcon()`: Refresh button appearance based on device state
+
+**micmute.js / outputmute.js** - Mute toggle action classes:
+- Constructor: Initialize with context, listen for device change events
+- `run()`: Toggle mute/unmute with fast-click protection
+- `refreshMuteStatus()`: Query current mute state from API
+- `setActive(active)`: Refresh status when button becomes visible
+- `updateIcon()`: Update button state and dynamic label ("Mute" or "Unmute")
 
 ### Build Process
 
@@ -331,6 +394,16 @@ To add a new audio-related action:
 
 ## Version History
 
+### v2.0.0 (January 16, 2026)
+- ✅ **NEW:** Microphone Mute Toggle action
+- ✅ **NEW:** Output Mute Toggle action (speakers/headphones)
+- ✅ **NEW:** Independent mute state (persists when switching devices)
+- ✅ **NEW:** Dynamic labels showing next action ("Mute" or "Unmute")
+- ✅ **NEW:** External mute change detection capability
+- ✅ **NEW:** Fast-click protection on mute toggle buttons
+- ✅ Enhanced API with mute control endpoints
+- ✅ Event-driven architecture for device change monitoring
+
 ### v1.0.0 (January 12, 2026)
 - ✅ Initial release
 - ✅ Set Input Device action
@@ -344,11 +417,11 @@ To add a new audio-related action:
 ## Future Enhancements
 
 - [ ] Volume control slider in Property Inspector
-- [ ] Mute/unmute toggle action
-- [ ] Audio level meter visualization
+- [ ] Audio level meter visualization on buttons
 - [ ] Device hotkey support (switch without Ulanzi Deck)
 - [ ] Audio routing matrix (input to output mapping)
 - [ ] Multi-device profiles (switch multiple devices with one button)
+- [ ] Real-time external mute change sync to button UI
 - [ ] Windows support via alternative audio API
 
 ## License
@@ -369,4 +442,4 @@ For issues, questions, or feature requests, contact:
 
 ---
 
-**Note:** This README assumes the plugin is stable and production-ready as of version 1.0.0. For development versions, refer to commit history and development notes.
+**Note:** This README assumes the plugin is stable and production-ready as of version 2.0.0. For development versions, refer to commit history and development notes.

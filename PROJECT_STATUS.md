@@ -1,15 +1,15 @@
 # AnySound Plugin - Project Status ✅
 
-**Date:** January 12, 2026
+**Date:** January 16, 2026
 **Status:** Production Ready
-**Version:** 1.0.0
+**Version:** 2.0.0
 
 ## ✅ Project Structure - Complete
 
 ### Core Files
-- ✅ **README.md** - Comprehensive documentation (372 lines)
+- ✅ **README.md** - Comprehensive documentation (445+ lines)
 - ✅ **LICENSE** - MIT License
-- ✅ **CHANGELOG.md** - Version history and changes
+- ✅ **CHANGELOG.md** - Version history and changes (v2.0.0 documented)
 - ✅ **CONTRIBUTING.md** - Contribution guidelines
 - ✅ **package.json** - Enhanced with keywords, metadata, scripts
 - ✅ **.gitignore** - Properly configured (node_modules, dist, macOS files)
@@ -21,16 +21,20 @@
 - ✅ **uninstall.sh** - Clean uninstallation script (executable)
 
 ### Source Code
-- ✅ **app.js** - Main application entry point
+- ✅ **plugin/app.js** - Main application entry point
 - ✅ **plugin/actions/audioapi.js** - Core audio API
 - ✅ **plugin/actions/inputdevice.js** - Input device action
 - ✅ **plugin/actions/outputdevice.js** - Output device action
-- ✅ **manifest.json** - Plugin metadata
+- ✅ **plugin/actions/micmute.js** - Microphone mute toggle action
+- ✅ **plugin/actions/outputmute.js** - Output mute toggle action
+- ✅ **manifest.json** - Plugin metadata (4 actions)
 - ✅ **webpack.config.js** - Build configuration
 
 ### Assets
 - ✅ **assets/actions/input/** - Input device icons (SVG)
 - ✅ **assets/actions/output/** - Output device icons (SVG)
+- ✅ **assets/actions/micmute/** - Microphone mute icons (SVG)
+- ✅ **assets/actions/outputmute/** - Output mute icons (SVG)
 - ✅ **assets/icons/** - Plugin category icons (SVG)
 
 ### UI Components
@@ -117,8 +121,9 @@ npm test         # Run tests (placeholder)
 ### CHANGELOG.md
 - ✅ Follows Keep a Changelog format
 - ✅ Semantic versioning
+- ✅ v2.0.0 documented with mute toggle features
 - ✅ v1.0.0 documented with all features and fixes
-- ✅ Planned features listed
+- ✅ Planned features updated
 
 ### CONTRIBUTING.md
 - ✅ Code of conduct
@@ -185,7 +190,7 @@ npm test         # Run tests (placeholder)
 ```bash
 # Create release package
 npm run build
-zip -r AnySound-v1.0.0.zip \
+zip -r AnySound-v2.0.0.zip \
   manifest.json \
   dist/ \
   plugin/ \
@@ -198,18 +203,20 @@ zip -r AnySound-v1.0.0.zip \
 
 ### To Publish to Git Repository
 ```bash
-# Initial commit
-git commit -m "feat: Initial release v1.0.0
+# Commit v2.0.0 changes
+git commit -m "feat: Add mute toggle actions v2.0.0
 
-- Set Input Device action
-- Set Output Device action
-- Real-time device detection
-- Visual feedback
-- Comprehensive documentation
-- Development scripts"
+- Microphone Mute Toggle action
+- Output Mute Toggle action
+- Independent mute state (persists across device changes)
+- Dynamic labels (Mute/Unmute)
+- Fast-click protection
+- Enhanced API with mute endpoints
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 
 # Tag the release
-git tag -a v1.0.0 -m "Version 1.0.0 - Initial Release"
+git tag -a v2.0.0 -m "Version 2.0.0 - Mute Toggle Actions"
 
 # Push to remote (when ready)
 git push origin main --tags
@@ -236,16 +243,17 @@ git push origin main --tags
 
 ## 📊 Project Metrics
 
-- **Total Files**: 44 tracked in git
-- **Lines of Documentation**: 500+ across all .md files
-- **Code Files**: 7 (.js files)
-- **Asset Files**: 11 (SVG icons)
+- **Total Files**: 50+ tracked in git
+- **Lines of Documentation**: 600+ across all .md files
+- **Code Files**: 9 (.js files - includes 2 new mute actions)
+- **Asset Files**: 17 (SVG icons - includes mute button icons)
 - **Configuration Files**: 6
 - **Scripts**: 2 (install-dev.sh, uninstall.sh)
+- **Actions**: 4 (Input Device, Output Device, Mic Mute, Output Mute)
 
 ---
 
 **Status**: ✅ All project requirements met. Ready for production use and distribution.
 
-**Last Updated**: January 12, 2026
+**Last Updated**: January 16, 2026
 **Maintainer**: Moraes

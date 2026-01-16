@@ -12,10 +12,16 @@ export default class OutputDevice {
       deviceIndex: null,
       deviceList: []
     }
+    this.isSwitching = false // Flag para evitar múltiplas chamadas simultâneas
 
     // Aguarda AudioAPI carregar devices
     this.$AudioAPI.on('devicesLoaded', () => {
       this.sendDeviceList()
+    })
+
+    // Aguarda status inicial ser carregado para atualizar ícone corretamente
+    this.$AudioAPI.on('statusLoaded', () => {
+      this.updateIcon()
     })
 
     // Monitora mudanças de device ativo
@@ -24,7 +30,11 @@ export default class OutputDevice {
     })
 
     this.sendDeviceList()
-    this.updateIcon()
+
+    // Só atualiza ícone se status já foi carregado, senão aguarda evento statusLoaded
+    if (this.$AudioAPI.isStatusLoaded) {
+      this.updateIcon()
+    }
   }
 
   // Envia lista de devices para PropertyInspector
@@ -32,19 +42,10 @@ export default class OutputDevice {
     const devices = this.$AudioAPI.getDevices('output')
     this.config.deviceList = devices
 
-    console.log('[OUTPUT] sendDeviceList - devices:', devices ? devices.length : 0)
-
-    if (!devices || devices.length === 0) {
-      console.warn('[OUTPUT] No devices to send!')
-      return
-    }
-
     this.$UD.sendParamFromPlugin({
       list: devices,
       currentIndex: this.config.deviceIndex
     }, this.context)
-
-    console.log('[OUTPUT] Sent list with', devices.length, 'devices')
   }
 
   // Botão adicionado ao deck
@@ -55,31 +56,63 @@ export default class OutputDevice {
 
   // Botão clicado - troca device
   async run() {
+    // Proteção contra fast switching
+    if (this.isSwitching) {
+      console.warn('[OUTPUT] Switch already in progress, ignoring...')
+      this.$UD.toast('⏳ Aguarde...')
+      return
+    }
+
     const index = this.config.deviceIndex
+    console.log('[OUTPUT] run() called - deviceIndex:', index)
 
     if (index === null || index === undefined) {
+      console.error('[OUTPUT] Device not configured - index is null/undefined')
       this.$UD.toast('⚠️ Device not configured')
       return
     }
 
     const devices = this.$AudioAPI.getDevices('output')
+    console.log('[OUTPUT] Available devices:', devices.length, 'devices')
+    console.log('[OUTPUT] Device list:', devices.map((d, i) => `[${i}] ${d.name}`).join(', '))
+
     const device = devices[index]
+    console.log('[OUTPUT] Looking for device at index', index, ':', device ? device.name : 'NOT FOUND')
 
     if (!device) {
-      this.$UD.toast('❌ Device not found')
+      console.error('[OUTPUT] Device not found at index', index, '- Total devices:', devices.length)
+      this.$UD.toast(`❌ Device not found (idx ${index})`)
+      return
+    }
+
+    // Verifica se o device já está ativo (evita chamada desnecessária à API)
+    const currentIndex = this.$AudioAPI.getCurrentDeviceIndex('output')
+    if (Number(currentIndex) === Number(index)) {
+      console.log('[OUTPUT] Device already active, skipping API call')
+      this.$UD.toast(`✓ ${device.name}`)
       return
     }
 
     console.log('[OUTPUT] Switching to device at index:', index, '(', device.name, ')')
 
-    // Usa endpoint index (resolve problema de nomes duplicados)
-    const success = await this.$AudioAPI.setDeviceByIndex('output', index)
+    // Marca como switching
+    this.isSwitching = true
 
-    if (success) {
-      this.$UD.toast(`🔊 ${device.name}`)
-      this.updateIcon()
-    } else {
-      this.$UD.toast('❌ Failed to switch device')
+    try {
+      // Usa endpoint index (resolve problema de nomes duplicados)
+      const success = await this.$AudioAPI.setDeviceByIndex('output', index)
+
+      if (success) {
+        this.$UD.toast(`🔊 ${device.name}`)
+        this.updateIcon()
+      } else {
+        this.$UD.toast('❌ Failed to switch device')
+      }
+    } finally {
+      // Sempre libera o lock após 500ms
+      setTimeout(() => {
+        this.isSwitching = false
+      }, 500)
     }
   }
 
@@ -93,7 +126,8 @@ export default class OutputDevice {
   // Settings atualizados do PropertyInspector
   setParams(params) {
     if (params.currentIndex !== undefined) {
-      this.config.deviceIndex = params.currentIndex
+      // Garante que deviceIndex seja sempre número
+      this.config.deviceIndex = Number(params.currentIndex)
       this.updateIcon()
     }
   }
@@ -115,8 +149,10 @@ export default class OutputDevice {
       return
     }
 
-    const currentDevice = this.$AudioAPI.getCurrentDevice('output')
-    const isActive = currentDevice === device.name
+    // IMPORTANTE: Compara por ÍNDICE, não por nome (resolve ARZOPAs duplicados)
+    // Converte ambos para Number para evitar problema de string vs number (0 !== "0")
+    const currentIndex = this.$AudioAPI.getCurrentDeviceIndex('output')
+    const isActive = Number(currentIndex) === Number(index)
 
     this.$UD.setStateIcon(this.context, isActive ? 1 : 0) // 1=Verde, 0=Vermelho
   }

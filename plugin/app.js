@@ -9,6 +9,8 @@ import { UlanzideckApi } from './actions/plugin-common-node/index.js'
 import AudioAPI from './actions/audioapi.js'
 import InputDevice from './actions/inputdevice.js'
 import OutputDevice from './actions/outputdevice.js'
+import MicMute from './actions/micmute.js'
+import OutputMute from './actions/outputmute.js'
 
 // Cache de instâncias de botões
 const ACTION_CACHES = {}
@@ -42,6 +44,10 @@ $UD.onAdd(jsn => {
       ACTION_CACHES[context] = new InputDevice(context, $UD, $AudioAPI)
     } else if (uuid === 'com.moraes.anysound.output') {
       ACTION_CACHES[context] = new OutputDevice(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.micmute') {
+      ACTION_CACHES[context] = new MicMute(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.outputmute') {
+      ACTION_CACHES[context] = new OutputMute(context, $UD, $AudioAPI)
     }
 
     // Aplica settings salvos (se houver)
@@ -63,6 +69,12 @@ $UD.onAdd(jsn => {
 $UD.onSetActive(jsn => {
   const { context, active } = jsn
   const instance = ACTION_CACHES[context]
+
+  // Quando deck fica visível, atualiza status da API
+  // Resolve: first load + mudanças externas (usuário muda device no macOS)
+  if (active) {
+    $AudioAPI.getStatus()
+  }
 
   if (instance && typeof instance.setActive === 'function') {
     instance.setActive(active)
