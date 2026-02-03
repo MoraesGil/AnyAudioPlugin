@@ -1,6 +1,6 @@
 {
   "name": "com.moraes.anysound.ulanziPlugin",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "Professional audio device switcher for Ulanzi Deck - Switch between microphones, speakers, and headphones with a single button press",
   "main": "dist/app.js",
   "scripts": {
