@@ -25,6 +25,11 @@ export default class AudioAPI extends EventEmitter {
       output: -1
     }
 
+    this.muteStatus = {
+      input: false,
+      output: false
+    }
+
     this.isConnected = false
     this.isStatusLoaded = false // Flag para sincronizar carregamento inicial
     this.init()
@@ -49,6 +54,10 @@ export default class AudioAPI extends EventEmitter {
 
     // Carrega status inicial (índices dos devices ativos)
     await this.getStatus()
+
+    // Carrega status de mute inicial
+    await this.getMuteStatus('input')
+    await this.getMuteStatus('output')
 
     // Marca status como carregado e emite evento
     this.isStatusLoaded = true
@@ -169,5 +178,37 @@ export default class AudioAPI extends EventEmitter {
 
   getCurrentDeviceIndex(type) {
     return this.currentIndexes[type]
+  }
+
+  async getMuteStatus(type) {
+    const result = await this.callAPI(`/audio/${type}/mute/status`)
+
+    if (result.success && result.data) {
+      const oldMuteStatus = this.muteStatus[type]
+      this.muteStatus[type] = result.data.muted || false
+
+      // Emite evento se mudou
+      if (oldMuteStatus !== this.muteStatus[type]) {
+        this.emit(`${type}MuteChanged`, this.muteStatus[type])
+      }
+    }
+
+    return this.muteStatus[type]
+  }
+
+  async toggleMute(type) {
+    const result = await this.callAPI(`/audio/${type}/mute/toggle`)
+
+    if (result.success && result.data && result.data.success) {
+      this.muteStatus[type] = result.data.muted
+      this.emit(`${type}MuteChanged`, this.muteStatus[type])
+      return true
+    }
+
+    return false
+  }
+
+  isMuted(type) {
+    return this.muteStatus[type]
   }
 }

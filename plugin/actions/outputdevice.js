@@ -29,6 +29,11 @@ export default class OutputDevice {
       this.updateIcon()
     })
 
+    // Monitora mudanças de mute
+    this.$AudioAPI.on('outputMuteChanged', () => {
+      this.updateIcon()
+    })
+
     this.sendDeviceList()
 
     // Só atualiza ícone se status já foi carregado, senão aguarda evento statusLoaded
@@ -54,65 +59,83 @@ export default class OutputDevice {
     this.updateIcon()
   }
 
-  // Botão clicado - troca device
+  // Botão clicado - implementa toggle de 3 estados
   async run() {
     // Proteção contra fast switching
     if (this.isSwitching) {
-      console.warn('[OUTPUT] Switch already in progress, ignoring...')
+      console.warn('[OUTPUT] Action already in progress, ignoring...')
       this.$UD.toast('⏳ Aguarde...')
       return
     }
 
     const index = this.config.deviceIndex
-    console.log('[OUTPUT] run() called - deviceIndex:', index)
 
     if (index === null || index === undefined) {
-      console.error('[OUTPUT] Device not configured - index is null/undefined')
       this.$UD.toast('⚠️ Device not configured')
       return
     }
 
     const devices = this.$AudioAPI.getDevices('output')
-    console.log('[OUTPUT] Available devices:', devices.length, 'devices')
-    console.log('[OUTPUT] Device list:', devices.map((d, i) => `[${i}] ${d.name}`).join(', '))
-
     const device = devices[index]
-    console.log('[OUTPUT] Looking for device at index', index, ':', device ? device.name : 'NOT FOUND')
 
     if (!device) {
-      console.error('[OUTPUT] Device not found at index', index, '- Total devices:', devices.length)
-      this.$UD.toast(`❌ Device not found (idx ${index})`)
+      this.$UD.toast('❌ Device not found')
       return
     }
 
-    // Verifica se o device já está ativo (evita chamada desnecessária à API)
     const currentIndex = this.$AudioAPI.getCurrentDeviceIndex('output')
-    if (Number(currentIndex) === Number(index)) {
-      console.log('[OUTPUT] Device already active, skipping API call')
-      this.$UD.toast(`✓ ${device.name}`)
-      return
-    }
-
-    console.log('[OUTPUT] Switching to device at index:', index, '(', device.name, ')')
+    const isThisDeviceActive = Number(currentIndex) === Number(index)
+    const isMuted = this.$AudioAPI.isMuted('output')
 
     // Marca como switching
     this.isSwitching = true
 
     try {
-      // Usa endpoint index (resolve problema de nomes duplicados)
-      const success = await this.$AudioAPI.setDeviceByIndex('output', index)
+      // CASO 1: Dispositivo NÃO está ativo → ativa o dispositivo (sempre unmuted)
+      if (!isThisDeviceActive) {
+        console.log('[OUTPUT] Switching to device:', device.name)
+        const success = await this.$AudioAPI.setDeviceByIndex('output', index)
 
-      if (success) {
-        this.$UD.toast(`🔊 ${device.name}`)
-        this.updateIcon()
-      } else {
-        this.$UD.toast('❌ Failed to switch device')
+        if (success) {
+          // Garante que ao ativar um dispositivo, ele começa unmuted
+          if (this.$AudioAPI.isMuted('output')) {
+            await this.$AudioAPI.toggleMute('output')
+          }
+          this.$UD.toast(`🔊 ${device.name}`)
+          this.updateIcon()
+        } else {
+          this.$UD.toast('❌ Failed to switch device')
+        }
+      }
+      // CASO 2: Dispositivo está ativo E não está mutado → muta
+      else if (!isMuted) {
+        console.log('[OUTPUT] Muting device:', device.name)
+        const success = await this.$AudioAPI.toggleMute('output')
+
+        if (success) {
+          this.$UD.toast(`🔇 ${device.name} muted`)
+          this.updateIcon()
+        } else {
+          this.$UD.toast('❌ Failed to mute')
+        }
+      }
+      // CASO 3: Dispositivo está ativo E está mutado → desmuta
+      else {
+        console.log('[OUTPUT] Unmuting device:', device.name)
+        const success = await this.$AudioAPI.toggleMute('output')
+
+        if (success) {
+          this.$UD.toast(`🔊 ${device.name} unmuted`)
+          this.updateIcon()
+        } else {
+          this.$UD.toast('❌ Failed to unmute')
+        }
       }
     } finally {
-      // Sempre libera o lock após 500ms
+      // Sempre libera o lock após 300ms
       setTimeout(() => {
         this.isSwitching = false
-      }, 500)
+      }, 300)
     }
   }
 
@@ -125,6 +148,7 @@ export default class OutputDevice {
 
   // Settings atualizados do PropertyInspector
   setParams(params) {
+    console.log('[OUTPUT] setParams:', params, 'previous:', this.config.deviceIndex)
     if (params.currentIndex !== undefined) {
       // Garante que deviceIndex seja sempre número
       this.config.deviceIndex = Number(params.currentIndex)
@@ -132,12 +156,12 @@ export default class OutputDevice {
     }
   }
 
-  // Atualiza ícone (verde = ativo, vermelho = inativo)
+  // Atualiza ícone com 3 estados
   updateIcon() {
     const index = this.config.deviceIndex
 
     if (index === null || index === undefined) {
-      this.$UD.setStateIcon(this.context, 0) // Vermelho
+      this.$UD.setStateIcon(this.context, 0) // Inactive (vermelho)
       return
     }
 
@@ -145,16 +169,29 @@ export default class OutputDevice {
     const device = devices[index]
 
     if (!device) {
-      this.$UD.setStateIcon(this.context, 0) // Vermelho
+      this.$UD.setStateIcon(this.context, 0) // Inactive (vermelho)
       return
     }
 
-    // IMPORTANTE: Compara por ÍNDICE, não por nome (resolve ARZOPAs duplicados)
-    // Converte ambos para Number para evitar problema de string vs number (0 !== "0")
+    // Verifica se este botão representa o dispositivo atualmente ativo
     const currentIndex = this.$AudioAPI.getCurrentDeviceIndex('output')
-    const isActive = Number(currentIndex) === Number(index)
+    const isThisDeviceActive = Number(currentIndex) === Number(index)
 
-    this.$UD.setStateIcon(this.context, isActive ? 1 : 0) // 1=Verde, 0=Vermelho
+    if (!isThisDeviceActive) {
+      // State 0: Inactive (vermelho) - outro dispositivo está ativo
+      this.$UD.setStateIcon(this.context, 0)
+    } else {
+      // Este dispositivo está ativo, verifica se está mutado
+      const isMuted = this.$AudioAPI.isMuted('output')
+
+      if (isMuted) {
+        // State 2: Muted (cinza) - ativo mas mutado
+        this.$UD.setStateIcon(this.context, 2)
+      } else {
+        // State 1: Active (verde) - ativo e não mutado
+        this.$UD.setStateIcon(this.context, 1)
+      }
+    }
   }
 
   // Botão removido

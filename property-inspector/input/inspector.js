@@ -54,7 +54,7 @@ $UD.onParamFromPlugin(jsonObj => {
 
 // Aplica settings ao form - padrão oficial
 function onSetParams(params) {
-  console.log('[INPUT] onSetParams:', params)
+  console.log('[INPUT] onSetParams:', params, 'current:', ACTION_SETTING.currentIndex)
   ACTION_SETTING = { ...ACTION_SETTING, ...params }
 
   // Se recebeu lista de devices, renderizar
@@ -75,7 +75,7 @@ function renderForm(params) {
 
   if (!select || !list) return
 
-  console.log('[INPUT] Rendering', list.length, 'devices, selected:', currentIndex)
+  console.log('[INPUT] renderForm - currentIndex:', currentIndex, 'type:', typeof currentIndex)
 
   // Limpa select
   select.innerHTML = ''
@@ -89,6 +89,7 @@ function renderForm(params) {
     // Marca como selected - padrão oficial
     if (currentIndex * 1 === i) {
       option.selected = true
+      console.log('[INPUT] ✓ Selected:', list[i].name, 'index:', i)
     }
 
     select.appendChild(option)

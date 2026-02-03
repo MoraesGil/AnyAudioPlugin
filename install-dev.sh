@@ -47,6 +47,11 @@ fi
 echo -e "${GREEN}✓ Build successful${NC}"
 echo ""
 
+# Clear Ulanzi Studio cache
+echo -e "${YELLOW}Clearing Ulanzi Studio cache...${NC}"
+rm -rf "$HOME/Library/Caches/Ulanzi Studio/" 2>/dev/null && echo -e "${GREEN}✓ Cache cleared${NC}" || echo -e "${YELLOW}⚠ No cache to clear${NC}"
+echo ""
+
 # Remove old installation
 if [ -d "$PLUGIN_DIR" ]; then
     echo -e "${YELLOW}Removing old installation...${NC}"
@@ -64,6 +69,7 @@ cp -r plugin "$PLUGIN_DIR/"
 cp -r property-inspector "$PLUGIN_DIR/"
 cp -r assets "$PLUGIN_DIR/"
 cp -r libs "$PLUGIN_DIR/"
+cp -r node_modules "$PLUGIN_DIR/"
 cp manifest.json "$PLUGIN_DIR/"
 
 echo -e "${GREEN}✓ Plugin files copied${NC}"

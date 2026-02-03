@@ -1,0 +1,20 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Microfone cinza (mutado) - versão menor e centralizada -->
+  <rect width="256" height="256" fill="none"/>
+
+  <!-- Corpo do microfone -->
+  <rect x="113" y="85" width="30" height="60" rx="15" fill="#8E8E93" stroke="#8E8E93" stroke-width="3"/>
+
+  <!-- Suporte em U -->
+  <path d="M 95 145 Q 95 170 128 170 Q 161 170 161 145" fill="none" stroke="#8E8E93" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Haste -->
+  <line x1="128" y1="170" x2="128" y2="190" stroke="#8E8E93" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Base -->
+  <line x1="110" y1="190" x2="146" y2="190" stroke="#8E8E93" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- X indicador de mute -->
+  <line x1="100" y1="105" x2="120" y2="125" stroke="#8E8E93" stroke-width="6" stroke-linecap="round"/>
+  <line x1="120" y1="105" x2="100" y2="125" stroke="#8E8E93" stroke-width="6" stroke-linecap="round"/>
+</svg>

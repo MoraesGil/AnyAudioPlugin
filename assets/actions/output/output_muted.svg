@@ -1,0 +1,11 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Alto-falante cinza (mutado) - versão menor e centralizada -->
+  <rect width="256" height="256" fill="none"/>
+
+  <!-- Cone do speaker -->
+  <path d="M 95 105 L 120 105 L 155 85 L 155 171 L 120 151 L 95 151 L 95 105 Z" fill="#8E8E93" stroke="#8E8E93" stroke-width="3"/>
+
+  <!-- X indicador de mute (no lugar das ondas) -->
+  <line x1="170" y1="105" x2="195" y2="150" stroke="#8E8E93" stroke-width="6" stroke-linecap="round"/>
+  <line x1="195" y1="105" x2="170" y2="150" stroke="#8E8E93" stroke-width="6" stroke-linecap="round"/>
+</svg>

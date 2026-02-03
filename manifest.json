@@ -25,6 +25,9 @@
         },
         {
           "Image": "assets/actions/input/input_active.svg"
+        },
+        {
+          "Image": "assets/actions/input/input_muted.svg"
         }
       ],
       "SupportedInMultiActions": false
@@ -42,6 +45,9 @@
         },
         {
           "Image": "assets/actions/output/output_active.svg"
+        },
+        {
+          "Image": "assets/actions/output/output_muted.svg"
         }
       ],
       "SupportedInMultiActions": false
