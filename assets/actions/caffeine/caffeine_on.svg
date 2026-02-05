@@ -1,0 +1,22 @@
+<svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+  <!-- Coffee cup (GREEN - active/awake) -->
+  <path d="M 40 50 Q 40 45 45 45 L 95 45 Q 100 45 100 50 L 105 100 Q 105 110 95 110 L 50 110 Q 40 110 40 100 Z" fill="#4CAF50" stroke="#2E7D32" stroke-width="3"/>
+
+  <!-- Coffee liquid (darker green) -->
+  <ellipse cx="72" cy="52" rx="25" ry="8" fill="#1B5E20"/>
+
+  <!-- Handle -->
+  <path d="M 100 60 Q 115 65 115 75 Q 115 85 100 90" fill="none" stroke="#2E7D32" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Steam (active - bright green) -->
+  <path d="M 55 35 Q 52 25 55 15" fill="none" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 72 35 Q 69 25 72 15" fill="none" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 89 35 Q 86 25 89 15" fill="none" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Saucer -->
+  <ellipse cx="72" cy="112" rx="42" ry="8" fill="#4CAF50" stroke="#2E7D32" stroke-width="2"/>
+
+  <!-- "Awake" indicator (energy lines) -->
+  <line x1="20" y1="75" x2="30" y2="75" stroke="#4CAF50" stroke-width="3" stroke-linecap="round"/>
+  <line x1="114" y1="75" x2="124" y2="75" stroke="#4CAF50" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -83,6 +83,22 @@
         }
       ],
       "SupportedInMultiActions": false
+    },
+    {
+      "Name": "Caffeine Mode",
+      "Tooltip": "Prevent system sleep while keeping monitors in their current state",
+      "Icon": "assets/actions/caffeine/icon_caffeine.svg",
+      "UUID": "com.moraes.anysound.caffeine",
+      "state": 0,
+      "States": [
+        {
+          "Image": "assets/actions/caffeine/caffeine_off.svg"
+        },
+        {
+          "Image": "assets/actions/caffeine/caffeine_on.svg"
+        }
+      ],
+      "SupportedInMultiActions": false
     }
   ],
   "OS": [

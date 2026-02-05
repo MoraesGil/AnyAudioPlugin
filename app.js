@@ -11,6 +11,7 @@ import InputDevice from './actions/inputdevice.js'
 import OutputDevice from './actions/outputdevice.js'
 import MicMute from './actions/micmute.js'
 import OutputMute from './actions/outputmute.js'
+import Caffeine from './actions/caffeine.js'
 
 // Cache de instâncias de botões
 const ACTION_CACHES = {}
@@ -48,6 +49,8 @@ $UD.onAdd(jsn => {
       ACTION_CACHES[context] = new MicMute(context, $UD, $AudioAPI)
     } else if (uuid === 'com.moraes.anysound.outputmute') {
       ACTION_CACHES[context] = new OutputMute(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.caffeine') {
+      ACTION_CACHES[context] = new Caffeine(context, $UD, $AudioAPI)
     }
 
     // Aplica settings salvos (se houver)

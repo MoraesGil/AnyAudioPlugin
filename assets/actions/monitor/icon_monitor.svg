@@ -1,0 +1,16 @@
+<svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monitor screen -->
+  <rect x="20" y="30" width="104" height="70" rx="4" fill="#4A90E2" stroke="#2C5F8D" stroke-width="3"/>
+
+  <!-- Monitor stand base -->
+  <rect x="60" y="100" width="24" height="8" rx="2" fill="#666"/>
+
+  <!-- Monitor stand neck -->
+  <rect x="68" y="100" width="8" height="15" fill="#666"/>
+
+  <!-- Screen bezel -->
+  <rect x="24" y="34" width="96" height="62" rx="2" fill="#1a1a1a"/>
+
+  <!-- Power indicator (blue dot) -->
+  <circle cx="72" cy="112" r="3" fill="#4A90E2"/>
+</svg>

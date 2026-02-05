@@ -1,0 +1,21 @@
+<svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monitor screen (GREEN - active) -->
+  <rect x="20" y="30" width="104" height="70" rx="4" fill="#4CAF50" stroke="#2E7D32" stroke-width="3"/>
+
+  <!-- Monitor stand base -->
+  <rect x="60" y="100" width="24" height="8" rx="2" fill="#666"/>
+
+  <!-- Monitor stand neck -->
+  <rect x="68" y="100" width="8" height="15" fill="#666"/>
+
+  <!-- Screen bezel (active/bright) -->
+  <rect x="24" y="34" width="96" height="62" rx="2" fill="#E8F5E9"/>
+
+  <!-- Content on screen (simulated) -->
+  <rect x="32" y="42" width="80" height="6" rx="2" fill="#4CAF50" opacity="0.6"/>
+  <rect x="32" y="54" width="60" height="6" rx="2" fill="#4CAF50" opacity="0.4"/>
+  <rect x="32" y="66" width="70" height="6" rx="2" fill="#4CAF50" opacity="0.5"/>
+
+  <!-- Power indicator (green - ON) -->
+  <circle cx="72" cy="112" r="3" fill="#4CAF50"/>
+</svg>
