@@ -162,6 +162,9 @@ export default class AudioAPI extends EventEmitter {
     this.currentDevices[type] = result.data.device
     this.currentIndexes[type] = deviceIndex
 
+    // Atualiza status de mute após trocar device (evita cache stale)
+    await this.getMuteStatus(type)
+
     // Emite evento para atualizar ícones de todos os botões
     this.emit(`${type}Changed`, result.data.device)
 
