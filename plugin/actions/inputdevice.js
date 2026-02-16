@@ -1,6 +1,6 @@
 /**
  * InputDevice Action - Set Input Device (Microphone)
- * Segue padrão oficial do SDK Ulanzi
+ * Usa UID para identificar dispositivos (estável entre reordenações)
  */
 
 export default class InputDevice {
@@ -9,10 +9,11 @@ export default class InputDevice {
     this.$AudioAPI = $AudioAPI
     this.context = context
     this.config = {
-      deviceIndex: null,
+      deviceUID: null,
+      deviceIndex: null, // Legacy fallback
       deviceList: []
     }
-    this.isSwitching = false // Flag para evitar múltiplas chamadas simultâneas
+    this.isSwitching = false
 
     // Aguarda AudioAPI carregar devices
     this.$AudioAPI.on('devicesLoaded', () => {
@@ -42,6 +43,13 @@ export default class InputDevice {
     }
   }
 
+  // Encontra dispositivo na lista pelo UID
+  findDeviceByUID(uid) {
+    if (!uid) return null
+    const devices = this.$AudioAPI.getDevices('input')
+    return devices.find(d => d.uid === uid) || null
+  }
+
   // Envia lista de devices para PropertyInspector
   sendDeviceList() {
     const devices = this.$AudioAPI.getDevices('input')
@@ -49,7 +57,7 @@ export default class InputDevice {
 
     this.$UD.sendParamFromPlugin({
       list: devices,
-      currentIndex: this.config.deviceIndex
+      currentUID: this.config.deviceUID
     }, this.context)
   }
 
@@ -68,23 +76,22 @@ export default class InputDevice {
       return
     }
 
-    const index = this.config.deviceIndex
+    const uid = this.config.deviceUID
 
-    if (index === null || index === undefined) {
+    if (!uid) {
       this.$UD.toast('⚠️ Device not configured')
       return
     }
 
-    const devices = this.$AudioAPI.getDevices('input')
-    const device = devices[index]
+    const device = this.findDeviceByUID(uid)
 
     if (!device) {
-      this.$UD.toast('❌ Device not found')
+      this.$UD.toast('❌ Device not found (disconnected?)')
       return
     }
 
-    const currentIndex = this.$AudioAPI.getCurrentDeviceIndex('input')
-    const isThisDeviceActive = Number(currentIndex) === Number(index)
+    const currentUID = this.$AudioAPI.getCurrentDeviceUID('input')
+    const isThisDeviceActive = currentUID === uid
     const isMuted = this.$AudioAPI.isMuted('input')
 
     // Marca como switching
@@ -93,8 +100,8 @@ export default class InputDevice {
     try {
       // CASO 1: Dispositivo NÃO está ativo → ativa o dispositivo (sempre unmuted)
       if (!isThisDeviceActive) {
-        console.log('[INPUT] Switching to device:', device.name)
-        const success = await this.$AudioAPI.setDeviceByIndex('input', index)
+        console.log('[INPUT] Switching to device:', device.name, 'UID:', uid)
+        const success = await this.$AudioAPI.setDeviceByUID('input', uid)
 
         if (success) {
           // Garante que ao ativar um dispositivo, ele começa unmuted
@@ -148,34 +155,48 @@ export default class InputDevice {
 
   // Settings atualizados do PropertyInspector
   setParams(params) {
-    console.log('[INPUT] setParams:', params, 'previous:', this.config.deviceIndex)
-    if (params.currentIndex !== undefined) {
-      // Garante que deviceIndex seja sempre número
-      this.config.deviceIndex = Number(params.currentIndex)
+    console.log('[INPUT] setParams:', params, 'previous UID:', this.config.deviceUID)
+
+    if (params.deviceUID !== undefined && params.deviceUID !== '') {
+      // Novo formato: UID-based (estável)
+      this.config.deviceUID = params.deviceUID
+      this.updateIcon()
+    } else if (params.currentIndex !== undefined && !this.config.deviceUID) {
+      // Legacy fallback: converte index para UID se possível
+      const devices = this.$AudioAPI.getDevices('input')
+      const index = Number(params.currentIndex)
+      const device = devices[index]
+
+      if (device && device.uid) {
+        console.log('[INPUT] Legacy migration: index', index, '→ UID', device.uid, '(', device.name, ')')
+        this.config.deviceUID = device.uid
+      } else {
+        console.warn('[INPUT] Legacy index', index, 'could not be resolved - device list may have changed')
+      }
+
       this.updateIcon()
     }
   }
 
   // Atualiza ícone com 3 estados
   updateIcon() {
-    const index = this.config.deviceIndex
+    const uid = this.config.deviceUID
 
-    if (index === null || index === undefined) {
+    if (!uid) {
       this.$UD.setStateIcon(this.context, 0) // Inactive (vermelho)
       return
     }
 
-    const devices = this.$AudioAPI.getDevices('input')
-    const device = devices[index]
+    const device = this.findDeviceByUID(uid)
 
     if (!device) {
-      this.$UD.setStateIcon(this.context, 0) // Inactive (vermelho)
+      this.$UD.setStateIcon(this.context, 0) // Inactive (vermelho) - device desconectado
       return
     }
 
     // Verifica se este botão representa o dispositivo atualmente ativo
-    const currentIndex = this.$AudioAPI.getCurrentDeviceIndex('input')
-    const isThisDeviceActive = Number(currentIndex) === Number(index)
+    const currentUID = this.$AudioAPI.getCurrentDeviceUID('input')
+    const isThisDeviceActive = currentUID === uid
 
     if (!isThisDeviceActive) {
       // State 0: Inactive (vermelho) - outro dispositivo está ativo

@@ -25,6 +25,11 @@ export default class AudioAPI extends EventEmitter {
       output: -1
     }
 
+    this.currentUIDs = {
+      input: null,
+      output: null
+    }
+
     this.muteStatus = {
       input: false,
       output: false
@@ -107,6 +112,10 @@ export default class AudioAPI extends EventEmitter {
       this.currentIndexes.input = result.data.input.index
       this.currentIndexes.output = result.data.output.index
 
+      // Armazena UIDs (identificador estável - não muda com reordenação)
+      this.currentUIDs.input = result.data.input.uid || null
+      this.currentUIDs.output = result.data.output.uid || null
+
       // Emite eventos se mudou
       if (oldInput !== this.currentDevices.input) {
         this.emit('inputChanged', this.currentDevices.input)
@@ -171,6 +180,35 @@ export default class AudioAPI extends EventEmitter {
     return true
   }
 
+  async setDeviceByUID(type, deviceUID) {
+    const encodedUID = encodeURIComponent(deviceUID)
+    const result = await this.callAPI(`/audio/${type}/uid/${encodedUID}/set`)
+
+    if (!result.success) {
+      console.error(`❌ API call failed:`, result.error)
+      return false
+    }
+
+    if (!result.data.success) {
+      console.error(`❌ Failed to change ${type} by UID:`, result.data.error || 'Unknown error')
+      return false
+    }
+
+    console.log(`✅ ${type} changed to: ${result.data.device} (UID: ${deviceUID})`)
+
+    // Atualiza cache imediatamente
+    this.currentDevices[type] = result.data.device
+    this.currentUIDs[type] = deviceUID
+
+    // Atualiza status de mute após trocar device
+    await this.getMuteStatus(type)
+
+    // Emite evento para atualizar ícones de todos os botões
+    this.emit(`${type}Changed`, result.data.device)
+
+    return true
+  }
+
   getDevices(type) {
     return this.devices[type] || []
   }
@@ -181,6 +219,10 @@ export default class AudioAPI extends EventEmitter {
 
   getCurrentDeviceIndex(type) {
     return this.currentIndexes[type]
+  }
+
+  getCurrentDeviceUID(type) {
+    return this.currentUIDs[type]
   }
 
   async getMuteStatus(type) {

@@ -1,6 +1,6 @@
 /**
  * Property Inspector - Set Input Device
- * Padrão oficial do SDK Ulanzi
+ * Usa UID para identificar dispositivos (estável entre reordenações)
  */
 
 let ACTION_SETTING = {}
@@ -54,7 +54,7 @@ $UD.onParamFromPlugin(jsonObj => {
 
 // Aplica settings ao form - padrão oficial
 function onSetParams(params) {
-  console.log('[INPUT] onSetParams:', params, 'current:', ACTION_SETTING.currentIndex)
+  console.log('[INPUT] onSetParams:', params, 'current UID:', ACTION_SETTING.deviceUID)
   ACTION_SETTING = { ...ACTION_SETTING, ...params }
 
   // Se recebeu lista de devices, renderizar
@@ -68,28 +68,28 @@ function onSetParams(params) {
   }
 }
 
-// Renderiza form - padrão oficial
+// Renderiza form com UID como value
 function renderForm(params) {
-  const { list, currentIndex } = ACTION_SETTING
+  const { list, currentUID } = ACTION_SETTING
   const select = document.getElementById('oList')
 
   if (!select || !list) return
 
-  console.log('[INPUT] renderForm - currentIndex:', currentIndex, 'type:', typeof currentIndex)
+  console.log('[INPUT] renderForm - currentUID:', currentUID)
 
   // Limpa select
   select.innerHTML = ''
 
-  // Adiciona options
+  // Adiciona options com UID como value
   for (let i = 0; i < list.length; i++) {
     const option = document.createElement('option')
-    option.setAttribute('value', i)
+    option.setAttribute('value', list[i].uid)
     option.setAttribute('label', list[i].name)
 
-    // Marca como selected - padrão oficial
-    if (currentIndex * 1 === i) {
+    // Marca como selected pelo UID
+    if (currentUID && currentUID === list[i].uid) {
       option.selected = true
-      console.log('[INPUT] ✓ Selected:', list[i].name, 'index:', i)
+      console.log('[INPUT] ✓ Selected:', list[i].name, 'UID:', list[i].uid)
     }
 
     select.appendChild(option)
