@@ -1,21 +1,22 @@
 # AnySound Plugin for Ulanzi Deck
 
-**Version:** 2.0.0
+**Version:** 2.1.0
 **Author:** Moraes
-**Last Updated:** January 16, 2026
+**Last Updated:** February 2026
 
 ## Overview
 
-AnySound is a professional audio management plugin for Ulanzi Deck that provides complete audio control with device switching and independent mute toggles. Perfect for content creators, streamers, and professionals who need quick access to audio controls without leaving their workflow.
+AnySound is a professional audio management plugin for Ulanzi Deck that provides complete audio control with device switching, independent mute toggles, and a Caffeine mode to keep the system awake while saving power. Perfect for content creators, streamers, and professionals who need quick access to audio controls without leaving their workflow.
 
 ## Features
 
-- **Instant Device Switching**: Change audio devices with a single button press
-- **Four Action Types**:
+- **Instant Device Switching**: Change audio devices with a single button press (identified by UID for stability when hardware changes)
+- **Five Action Types**:
   - **Set Input Device**: Switch microphone/audio input
   - **Set Output Device**: Switch speakers/headphones/audio output
   - **Microphone Mute Toggle**: 🎤 Mute/unmute microphone independently
   - **Output Mute Toggle**: 🔊 Mute/unmute speakers/headphones independently
+  - **Caffeine Mode**: ☕ Prevent system sleep while allowing displays to dim (see [Caffeine](#caffeine-mode) below)
 - **Independent Mute Controls**:
   - Toggle buttons with no configuration needed
   - Mute state persists when switching devices
@@ -61,11 +62,12 @@ brew install --cask hammerspoon
 3. **Verify Installation:**
    - Open Ulanzi Studio
    - Look for "AnySound" category in the action list
-   - You should see four actions:
+   - You should see five actions:
      - Set Input Device
      - Set Output Device
      - Microphone Mute Toggle
      - Output Mute Toggle
+     - Caffeine Mode
 
 ## Usage
 
@@ -101,6 +103,32 @@ brew install --cask hammerspoon
    - Shows "Mute" when output is active (click to mute)
    - Shows "Unmute" when output is muted (click to unmute)
 
+### Setting Up Caffeine Mode
+
+1. **Drag "Caffeine Mode" action** to a button on your Ulanzi Deck
+2. **No configuration needed** - one click toggles ON/OFF
+3. **Green icon** = Caffeine ON (system won’t sleep; displays may dim)
+4. **Gray icon** = Caffeine OFF (normal sleep behavior)
+5. **Label** shows the next action: "Activate" or "Deactivate"
+6. **macOS notification** appears when you toggle (if Hammerspoon is configured)
+
+### Caffeine Mode
+
+Caffeine keeps your **system awake** (processes keep running) while **allowing displays to sleep** (saves power). One button toggles it.
+
+**What Caffeine does:**
+- **Prevents system sleep** – CPU and processes keep running (downloads, builds, streams, etc.)
+- **Allows display sleep** – Monitors can turn off or dim after the time set in **System Settings → Lock Screen → Turn display off after**
+- **Toggle on the deck** – One click to turn ON or OFF; icon and label reflect current state
+- **macOS notification** – Optional Hammerspoon notification when you toggle (e.g. "☕ Caffeine ON")
+
+**What Caffeine does not do:**
+- **Does not prevent display sleep** – Screens can still dim/turn off to save energy
+- **Does not control lock screen** – Whether the Mac asks for a password when the display wakes is set in **System Settings → Lock Screen → Require password after**. Use "Never" or the interval you want; Caffeine does not change this
+- **Does not keep displays always on** – If you want both system and displays never to sleep, you need a different solution (e.g. `caffeinate -d` or another app)
+
+**Typical use:** Long-running tasks (renders, syncs, streams) where you want the Mac to stay on but are fine with the screen turning off after a few minutes.
+
 ### Button States
 
 **Device Switching Buttons:**
@@ -111,6 +139,10 @@ brew install --cask hammerspoon
 **Mute Toggle Buttons:**
 - **Green Icon + "Mute" label**: Currently unmuted (click to mute)
 - **Red Icon + "Unmute" label**: Currently muted (click to unmute)
+
+**Caffeine Mode:**
+- **Green Icon + "Deactivate" label**: Caffeine ON (click to turn off)
+- **Gray Icon + "Activate" label**: Caffeine OFF (click to turn on)
 
 ### Example Setups
 
@@ -130,6 +162,9 @@ brew install --cask hammerspoon
 - Button 5: "Set Output → Speakers"
 - Button 6: "Output Mute Toggle"
 
+**With Caffeine (e.g. long recording/stream):**
+- Button 7: "Caffeine Mode" (keep system awake; displays can still turn off)
+
 ## Project Structure
 
 ```
@@ -142,7 +177,8 @@ com.moraes.anysound.ulanziPlugin/
 │       ├── inputdevice.js    # Input device action class
 │       ├── outputdevice.js   # Output device action class
 │       ├── micmute.js        # Microphone mute toggle action class
-│       └── outputmute.js     # Output mute toggle action class
+│       ├── outputmute.js     # Output mute toggle action class
+│       └── caffeine.js       # Caffeine mode (system awake, display may sleep)
 ├── dist/
 │   └── app.js                # Bundled application (production)
 ├── property-inspector/
@@ -154,7 +190,8 @@ com.moraes.anysound.ulanziPlugin/
 │       ├── input/            # Input device icons
 │       ├── output/           # Output device icons
 │       ├── micmute/          # Microphone mute icons
-│       └── outputmute/       # Output mute icons
+│       ├── outputmute/       # Output mute icons
+│       └── caffeine/         # Caffeine mode icons (on/off)
 ├── libs/                     # Ulanzi SDK libraries
 ├── package.json              # Node.js dependencies
 └── webpack.config.js         # Build configuration
@@ -386,13 +423,24 @@ To add a new audio-related action:
 
 1. **Polling Interval**: Device state is checked when button becomes active, not continuously. This is by design to reduce system load.
 
-2. **Device Name Changes**: If a device name changes (e.g., "AirPods" → "AirPods Pro"), you must reconfigure the button.
+2. **Device identification**: Input/Output device buttons store devices by **UID** (stable ID). If you add or remove hardware (e.g. a monitor), reconfigure the button once so it saves the new list; after that, indices no longer drift.
 
-3. **Multiple Instances**: If the same device is configured on multiple buttons, all will show green when that device is active.
+3. **Device Name Changes**: If a device name changes (e.g., "AirPods" → "AirPods Pro"), you must reconfigure the button.
 
-4. **macOS Only**: This plugin uses macOS-specific Hammerspoon integration. Windows/Linux versions would require different audio APIs.
+4. **Multiple Instances**: If the same device is configured on multiple buttons, all will show green when that device is active.
+
+5. **macOS Only**: This plugin uses macOS-specific Hammerspoon integration. Windows/Linux versions would require different audio APIs.
+
+6. **Caffeine and lock screen**: Caffeine does not change "Require password after sleep". Configure that in System Settings → Lock Screen if you don’t want a password when the display wakes.
 
 ## Version History
+
+### v2.1.0 (February 2026)
+- ✅ **NEW:** Caffeine Mode action – prevent system sleep, allow display sleep (economy mode)
+- ✅ Device selection by **UID** instead of index (stable when adding/removing hardware)
+- ✅ Hammerspoon notifications when toggling Caffeine
+- ✅ Caffeine included in built plugin (plugin/app.js); first-click creates instance
+- ✅ See [CAFFEINE.md](CAFFEINE.md) for details
 
 ### v2.0.0 (January 16, 2026)
 - ✅ **NEW:** Microphone Mute Toggle action

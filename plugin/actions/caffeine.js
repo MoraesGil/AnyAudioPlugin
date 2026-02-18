@@ -1,11 +1,10 @@
 /**
- * Caffeine Action - Toggle System Sleep Prevention
- * Botão toggle que previne o sistema de dormir (mas respeita estado dos monitores)
+ * Caffeine Action - Toggle System Sleep Prevention (economy mode)
+ * Botão toggle: ON = sistema não dorme (processos rodam), display PODE escurecer.
  *
- * IMPORTANTE:
- * - Ativo: Sistema continua processando, não entra em sleep
- * - Inativo: Comportamento normal do macOS (pode dormir)
- * - Monitores podem estar apagados independente do caffeine mode
+ * - Ativo: Apenas systemIdle (sistema acordado); display pode dormir → economiza energia.
+ * - Inativo: Comportamento normal do macOS (sistema e display podem dormir).
+ * - Lock screen: depende de "Requerer senha após" em Ajustes > Tela de bloqueio.
  */
 
 export default class Caffeine {
@@ -33,12 +32,8 @@ export default class Caffeine {
 
       if (result.success) {
         const newActive = result.data.active || false
-
-        // Só atualiza se mudou
-        if (this.isActive !== newActive) {
-          this.isActive = newActive
-          this.updateIcon()
-        }
+        this.isActive = newActive
+        this.updateIcon()
       }
     } catch (error) {
       console.error('[CAFFEINE] Failed to refresh status:', error)

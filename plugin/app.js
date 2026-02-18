@@ -11,6 +11,7 @@ import InputDevice from './actions/inputdevice.js'
 import OutputDevice from './actions/outputdevice.js'
 import MicMute from './actions/micmute.js'
 import OutputMute from './actions/outputmute.js'
+import Caffeine from './actions/caffeine.js'
 
 // Cache de instâncias de botões
 const ACTION_CACHES = {}
@@ -48,6 +49,8 @@ $UD.onAdd(jsn => {
       ACTION_CACHES[context] = new MicMute(context, $UD, $AudioAPI)
     } else if (uuid === 'com.moraes.anysound.outputmute') {
       ACTION_CACHES[context] = new OutputMute(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.caffeine') {
+      ACTION_CACHES[context] = new Caffeine(context, $UD, $AudioAPI)
     }
 
     // Aplica settings salvos (se houver)
@@ -83,17 +86,28 @@ $UD.onSetActive(jsn => {
 
 // Botão clicado
 $UD.onRun(jsn => {
-  const { context } = jsn
-  const instance = ACTION_CACHES[context]
+  const { context, uuid } = jsn
+  let instance = ACTION_CACHES[context]
 
-  if (!instance) {
-    // Se não existe, cria
-    $UD.emit('add', jsn)
-  } else {
-    console.log('🔘 onRun:', context)
-    if (typeof instance.run === 'function') {
-      instance.run(jsn)
+  // Se não existe (ex.: botão já no deck mas plugin atualizado), cria pela uuid do payload
+  if (!instance && uuid) {
+    if (uuid === 'com.moraes.anysound.input') {
+      ACTION_CACHES[context] = new InputDevice(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.output') {
+      ACTION_CACHES[context] = new OutputDevice(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.micmute') {
+      ACTION_CACHES[context] = new MicMute(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.outputmute') {
+      ACTION_CACHES[context] = new OutputMute(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.caffeine') {
+      ACTION_CACHES[context] = new Caffeine(context, $UD, $AudioAPI)
     }
+    instance = ACTION_CACHES[context]
+  }
+
+  if (instance && typeof instance.run === 'function') {
+    console.log('🔘 onRun:', context)
+    instance.run(jsn)
   }
 })
 
