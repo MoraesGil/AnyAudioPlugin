@@ -12,6 +12,9 @@ import OutputDevice from './actions/outputdevice.js'
 import MicMute from './actions/micmute.js'
 import OutputMute from './actions/outputmute.js'
 import Caffeine from './actions/caffeine.js'
+import LLMToggle from './actions/llmtoggle.js'
+import LLMStatus from './actions/llmstatus.js'
+import CpuTemp from './actions/cputemp.js'
 
 // Cache de instâncias de botões
 const ACTION_CACHES = {}
@@ -51,6 +54,12 @@ $UD.onAdd(jsn => {
       ACTION_CACHES[context] = new OutputMute(context, $UD, $AudioAPI)
     } else if (uuid === 'com.moraes.anysound.caffeine') {
       ACTION_CACHES[context] = new Caffeine(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.llmtoggle') {
+      ACTION_CACHES[context] = new LLMToggle(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.llmstatus') {
+      ACTION_CACHES[context] = new LLMStatus(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.cputemp') {
+      ACTION_CACHES[context] = new CpuTemp(context, $UD, $AudioAPI)
     }
 
     // Aplica settings salvos (se houver)
@@ -101,6 +110,12 @@ $UD.onRun(jsn => {
       ACTION_CACHES[context] = new OutputMute(context, $UD, $AudioAPI)
     } else if (uuid === 'com.moraes.anysound.caffeine') {
       ACTION_CACHES[context] = new Caffeine(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.llmtoggle') {
+      ACTION_CACHES[context] = new LLMToggle(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.llmstatus') {
+      ACTION_CACHES[context] = new LLMStatus(context, $UD, $AudioAPI)
+    } else if (uuid === 'com.moraes.anysound.cputemp') {
+      ACTION_CACHES[context] = new CpuTemp(context, $UD, $AudioAPI)
     }
     instance = ACTION_CACHES[context]
   }

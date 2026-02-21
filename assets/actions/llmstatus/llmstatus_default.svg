@@ -1,0 +1,20 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" fill="none"/>
+  <!-- Monitor frame -->
+  <rect x="44" y="40" width="168" height="120" rx="12" fill="#007AFF" opacity="0.15" stroke="#007AFF" stroke-width="4"/>
+  <!-- Screen -->
+  <rect x="56" y="52" width="144" height="96" rx="4" fill="#1C1C1E"/>
+  <!-- Status bars on screen -->
+  <circle cx="80" cy="76" r="5" fill="#34C759"/>
+  <rect x="94" y="72" width="60" height="8" rx="3" fill="#34C759" opacity="0.7"/>
+  <circle cx="80" cy="100" r="5" fill="#FF9500"/>
+  <rect x="94" y="96" width="48" height="8" rx="3" fill="#FF9500" opacity="0.7"/>
+  <circle cx="80" cy="124" r="5" fill="#FF3B30"/>
+  <rect x="94" y="120" width="72" height="8" rx="3" fill="#FF3B30" opacity="0.7"/>
+  <!-- Stand -->
+  <rect x="104" y="160" width="48" height="8" rx="2" fill="#007AFF"/>
+  <rect x="88" y="168" width="80" height="6" rx="3" fill="#007AFF" opacity="0.5"/>
+  <!-- Robot antenna -->
+  <line x1="188" y1="52" x2="188" y2="36" stroke="#007AFF" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="188" cy="32" r="5" fill="#007AFF"/>
+</svg>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover"
+  />
+  <title>LLM Toggle</title>
+  <link rel="stylesheet" href="../../libs/css/udpi.css">
+  <style>
+    .udpi-item-label{
+      width: 158px;
+    }
+    #statusHint {
+      font-size: 11px;
+      padding: 4px 12px 8px 12px;
+      opacity: 0.9;
+      transition: color 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <div class="udpi-wrapper hidden">
+    <form id="property-inspector" class="connnect-state connnect-state-ready">
+      <div type="select" class="udpi-item">
+        <div class="udpi-item-label" data-localize>LLM Model</div>
+        <select class="udpi-item-value select" id="oList" name="modelId">
+        </select>
+      </div>
+      <div id="statusHint" style="color:#8E8E93;">Selecione um modelo</div>
+      <div type="select" class="udpi-item">
+        <div class="udpi-item-label" data-localize>Engine</div>
+        <select class="udpi-item-value select" id="engineSelect" name="engine">
+          <option value="vllm-mlx" selected>vllm-mlx (prod)</option>
+          <option value="mlx-lm">mlx-lm (leve)</option>
+          <option value="litellm">litellm (proxy)</option>
+        </select>
+      </div>
+      <div type="field" class="udpi-item">
+        <div class="udpi-item-label" data-localize>Port</div>
+        <input class="udpi-item-value" id="portInput" name="port" type="number" min="1024" max="65535" value="58004" />
+      </div>
+    </form>
+  </div>
+
+  <script src="../../libs/js/constants.js"></script>
+  <script src="../../libs/js/eventEmitter.js"></script>
+  <script src="../../libs/js/timers.js"></script>
+  <script src="../../libs/js/utils.js"></script>
+  <script src="../../libs/js/ulanzideckApi.js"></script>
+  <script src="./inspector.js"></script>
+</body>
+</html>

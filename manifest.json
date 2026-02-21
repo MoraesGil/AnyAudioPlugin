@@ -1,5 +1,5 @@
 {
-  "Version": "2.1.0",
+  "Version": "2.2.0",
   "Author": "moraesdev",
   "Name": "AnySound",
   "Description": "Professional audio device switcher via Hammerspoon API",
@@ -97,6 +97,54 @@
         {
           "Image": "assets/actions/caffeine/caffeine_on.svg"
         }
+      ],
+      "SupportedInMultiActions": false
+    },
+    {
+      "Name": "LLM Toggle",
+      "Tooltip": "Start/Stop local LLM servers (vllm-mlx). Supports multiple models on different ports.",
+      "Icon": "assets/actions/llmtoggle/icon_llm.svg",
+      "UUID": "com.moraes.anysound.llmtoggle",
+      "PropertyInspectorPath": "property-inspector/llmtoggle/inspector.html",
+      "state": 0,
+      "States": [
+        {
+          "Image": "assets/actions/llmtoggle/llm_off.svg"
+        },
+        {
+          "Image": "assets/actions/llmtoggle/llm_on.svg"
+        },
+        {
+          "Image": "assets/actions/llmtoggle/llm_loading.svg"
+        }
+      ],
+      "SupportedInMultiActions": false
+    },
+    {
+      "Name": "LLM Status",
+      "Tooltip": "Show LLM dashboard: which models are running (green) and stopped (red) with RAM and engine info.",
+      "Icon": "assets/actions/llmstatus/icon_llmstatus.svg",
+      "UUID": "com.moraes.anysound.llmstatus",
+      "state": 0,
+      "States": [
+        {
+          "Image": "assets/actions/llmstatus/llmstatus_default.svg"
+        }
+      ],
+      "SupportedInMultiActions": false
+    },
+    {
+      "Name": "CPU Temp",
+      "Tooltip": "CPU temperature monitor. Green=ok, yellow=medium, orange=hot, red=danger. Press for legend and last reading.",
+      "Icon": "assets/actions/cputemp/icon_cputemp.svg",
+      "UUID": "com.moraes.anysound.cputemp",
+      "state": 0,
+      "States": [
+        { "Image": "assets/actions/cputemp/cputemp_green.svg" },
+        { "Image": "assets/actions/cputemp/cputemp_yellow.svg" },
+        { "Image": "assets/actions/cputemp/cputemp_orange.svg" },
+        { "Image": "assets/actions/cputemp/cputemp_red.svg" },
+        { "Image": "assets/actions/cputemp/cputemp_critical.svg" }
       ],
       "SupportedInMultiActions": false
     }

@@ -1,0 +1,9 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" fill="#282828"/>
+  <!-- Thermometer bulb -->
+  <circle cx="128" cy="200" r="32" fill="#34C759" stroke="#1a1a1a" stroke-width="2"/>
+  <!-- Stem -->
+  <rect x="104" y="48" width="48" height="120" rx="8" fill="#34C759" stroke="#1a1a1a" stroke-width="2"/>
+  <!-- Mercury -->
+  <rect x="112" y="72" width="32" height="96" rx="4" fill="#1a1a1a"/>
+</svg>

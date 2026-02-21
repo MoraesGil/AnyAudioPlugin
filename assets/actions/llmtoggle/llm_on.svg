@@ -1,0 +1,21 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" fill="none"/>
+  <!-- Head -->
+  <rect x="80" y="60" width="96" height="76" rx="16" fill="#34C759" opacity="0.2" stroke="#34C759" stroke-width="4"/>
+  <!-- Eyes -->
+  <circle cx="108" cy="90" r="10" fill="#34C759"/>
+  <circle cx="148" cy="90" r="10" fill="#34C759"/>
+  <!-- Mouth (happy) -->
+  <path d="M108 112 Q128 126 148 112" fill="none" stroke="#34C759" stroke-width="4" stroke-linecap="round"/>
+  <!-- Antenna -->
+  <line x1="128" y1="60" x2="128" y2="42" stroke="#34C759" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="128" cy="38" r="6" fill="#34C759"/>
+  <!-- Body -->
+  <rect x="92" y="140" width="72" height="40" rx="8" fill="#34C759" opacity="0.2" stroke="#34C759" stroke-width="4"/>
+  <!-- Arms -->
+  <line x1="80" y1="150" x2="60" y2="170" stroke="#34C759" stroke-width="6" stroke-linecap="round"/>
+  <line x1="176" y1="150" x2="196" y2="170" stroke="#34C759" stroke-width="6" stroke-linecap="round"/>
+  <!-- Legs -->
+  <line x1="112" y1="180" x2="112" y2="210" stroke="#34C759" stroke-width="6" stroke-linecap="round"/>
+  <line x1="144" y1="180" x2="144" y2="210" stroke="#34C759" stroke-width="6" stroke-linecap="round"/>
+</svg>
