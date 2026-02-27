@@ -67,45 +67,28 @@ export default class LLMToggle {
   }
 
   async refreshStatus() {
-    if (!this.config.modelId || !this.config.port) {
-      // No specific model configured: check if ANY server runs on default port
-      if (!this.config.modelId && !this.config.port) {
-        this.state = 0
-        this.updateIcon()
-        return
-      }
+    if (!this.config.modelId && !this.config.port) {
+      this.state = 0
+      this.updateIcon()
+      return
     }
 
     try {
-      const encoded = encodeURIComponent(this.config.modelId)
-      const result = await this.$AudioAPI.callAPI(
-        `/llm/status?model=${encoded}&port=${this.config.port}`
-      )
-      if (result.success && result.data) {
-        const wasRunning = this.state === 1
-        const isRunning = result.data.running === true
-
-        if (isRunning) {
+      // Uma única chamada ao status geral — evita double-fetch
+      const result = await this.$AudioAPI.callAPI('/llm/status')
+      if (result.success && result.data && result.data.servers) {
+        const modelId = this.config.modelId
+        const port    = this.config.port
+        const match   = result.data.servers.find(
+          s => (modelId && s.model === modelId) || (port && s.port === port)
+        )
+        if (match) {
           this.state = 1
+          this.config.port = match.port
           this.updateIcon()
-          this._updateTitle(result.data)
+          this._updateTitle(match)
           this.stopPolling()
         } else {
-          // Fallback: check general status for any server with this model
-          const general = await this.$AudioAPI.callAPI('/llm/status')
-          if (general.success && general.data && general.data.servers) {
-            const match = general.data.servers.find(
-              s => s.model === this.config.modelId
-            )
-            if (match) {
-              this.state = 1
-              this.config.port = match.port
-              this.updateIcon()
-              this._updateTitle(match)
-              this.stopPolling()
-              return
-            }
-          }
           this.state = 0
           this.updateIcon()
           this.$UD.setTitle('', this.context)
@@ -127,8 +110,11 @@ export default class LLMToggle {
   startPolling() {
     this.stopPolling()
     let count = 0
+    let inFlight = false  // evita chamadas sobrepostas se HS demorar
     this.pollTimer = setInterval(async () => {
+      if (inFlight) return
       count++
+      inFlight = true
 
       try {
         const encoded = encodeURIComponent(this.config.modelId)
@@ -143,7 +129,9 @@ export default class LLMToggle {
           this.stopPolling()
           return
         }
-      } catch (e) { /* keep polling */ }
+      } catch (e) { /* keep polling */ } finally {
+        inFlight = false
+      }
 
       if (count > 60) {
         this.stopPolling()

@@ -69,14 +69,22 @@ export default class AudioAPI extends EventEmitter {
     this.emit('statusLoaded')
   }
 
-  async callAPI(endpoint) {
+  async callAPI(endpoint, timeoutMs = 5000) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
     try {
-      const response = await fetch(`${this.API_BASE}${endpoint}`)
+      const response = await fetch(`${this.API_BASE}${endpoint}`, { signal: controller.signal })
       const data = await response.json()
       return { success: true, data }
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error(`API Timeout [${endpoint}]`)
+        return { success: false, error: 'timeout' }
+      }
       console.error(`API Error [${endpoint}]:`, error.message)
       return { success: false, error: error.message }
+    } finally {
+      clearTimeout(timer)
     }
   }
 

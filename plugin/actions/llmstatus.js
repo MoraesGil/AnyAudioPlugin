@@ -26,19 +26,16 @@ export default class LLMStatus {
     try {
       const result = await this.$AudioAPI.callAPI('/llm/dashboard')
 
-      if (result.success && result.data) {
-        if (result.data.shown) {
-          // Dashboard was shown (and may have killed servers).
-          // Trigger a global audio status refresh to update all toggle icons.
-          this.$AudioAPI.emit('statusLoaded')
-        } else {
-          this.$UD.toast('❌ ' + (result.data.error || 'Falha ao exibir'))
-        }
+      if (result.success && result.data && result.data.shown) {
+        // Dashboard exibido — atualiza ícones de todos os LLM Toggle buttons
+        this.$AudioAPI.emit('statusLoaded')
+      } else if (result.error === 'timeout') {
+        this.$UD.toast('❌ Hammerspoon timeout')
       } else {
-        this.$UD.toast('❌ Hammerspoon offline')
+        this.$UD.toast('❌ ' + (result.data?.error || result.error || 'Hammerspoon offline'))
       }
     } catch (e) {
-      this.$UD.toast('❌ Sem conexao')
+      this.$UD.toast('❌ Sem conexão')
     } finally {
       setTimeout(() => { this.isFetching = false }, 500)
     }
